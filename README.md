@@ -48,7 +48,7 @@ or you can reference `typescriptServices.js` in your IDE.
 
 Include `runtime-types/reflection.d.ts` in your project.
 
-## How to enable reflection
+### How to enable reflection
 
 Open `tsconfig.json` and add `"reflectionEnabled": true`, like the following snippet:
 
@@ -64,6 +64,67 @@ Open `tsconfig.json` and add `"reflectionEnabled": true`, like the following sni
     "reflectionEnabled": true
 }
 ```
+
+### And now show me the code!
+
+In one of your typescript files, create an interface and a class that implements it like the following:
+
+```TypeScript
+
+interface MyInterface {
+    doSomething(what: string): number;
+}
+
+class MyClass implements MyInterface {
+    counter = 0;
+
+    doSomething(what: string): number {
+        console.log('Doing ' + what);
+        return this.counter++;
+    }
+}
+
+```
+
+now let's print some useful things about MyClass...
+
+```TypeScript
+for (let int of $reflection.MyClass.implements) {
+    console.log('Implemented interface: ' + int.name)
+}
+
+for (let name in $reflection.MyClass.members) {
+    let member = $reflection.MyClass.members[name];
+    console.log("Member name: " + name + " - member kind: " + member.kind);
+}
+```
+
+compile with reflec-ts, launch it and, voilà!
+
+```shell
+$ node main.js
+Implemented interface: MyInterface
+Member name: counter - member kind: number
+Member name: doSomething - member kind: function
+```
+
+now let's build an instance of MyClass from its metadata...
+
+```TypeScript
+let ctor = $reflection.MyClass.getConstructor<MyClass>();
+let myObj = new ctor();
+console.log('myObj instanceof MyClass: ' + (myObj instanceof MyClass));
+myObj.doSomething('nothing :)');
+```
+
+launch it, and... yeah!!
+
+```shell
+$ node main.js
+myObj instanceof MyClass: true
+Doing nothing :)
+```
+
 
 ## Current limitations
 
