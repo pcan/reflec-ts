@@ -278,14 +278,14 @@ namespace ts.reflection {
         console.log('Registering package: ' + name);
         var pkg = Reflection.$libs['default'][name];
         pkg.registerClass = function(ctor, metadata) {
-            console.log('Registering constructor: ' + ctor.name);
+            //console.log('Registering constructor: ' + ctor.name);
             ctor.prototype[metadataField] = metadata;
             metadata.getConstructor = function(){ return ctor; };
         };
         //decorator:
         pkg.RegisterClass  = function(metadata) {
             return function(ctor) {
-                console.log('Invoking RegisterClass decorator for: ' + ctor.name);
+                //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
                 pkg.registerClass(ctor, metadata);
                 return ctor;
             }
