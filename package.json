@@ -2,7 +2,7 @@
     "name": "reflec-ts",
     "author": "Pierantonio Cangianiello",
     "homepage": "https://github.com/pcan/reflec-ts",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "license": "MIT",
     "description": "TypeScript compiler with Reflection capabilities",
     "keywords": [
