@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "pretty": true,
+        "outFile": "../../built/local/tsc.js",
+        "sourceMap": true,
+        "declaration": true,
+        "stripInternal": true
+    },
+    "files": [
+        "core.ts",
+        "performance.ts",
+        "sys.ts",
+        "types.ts",
+        "scanner.ts",
+        "reflection/commons.ts",
+        "reflection/builder.ts",
+        "reflection/writer.ts",
+        "reflection/main.ts",
+        "parser.ts",
+        "utilities.ts",
+        "binder.ts",
+        "checker.ts",
+        "sourcemap.ts",
+        "declarationEmitter.ts",
+        "emitter.ts",
+        "program.ts",
+        "commandLineParser.ts",
+        "tsc.ts",
+        "diagnosticInformationMap.generated.ts"
+    ]
+}

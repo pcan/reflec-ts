@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "pretty": true,
+        "out": "../../built/local/tsserver.js",
+        "sourceMap": true,
+        "stripInternal": true,
+        "types": [
+            "node"
+        ]
+    },
+    "files": [
+        "../services/shims.ts",
+        "../services/utilities.ts",
+        "editorServices.ts",
+        "protocol.d.ts",
+        "session.ts",
+        "server.ts"
+    ]
+}
