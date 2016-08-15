@@ -2020,7 +2020,7 @@ declare namespace ts.reflection {
     /**
      * AST enhancement entry point.
      */
-    function injectReflectionHooks(sourceFile: SourceFile, useDecorators?: boolean): void;
+    function injectReflectionHooks(sourceFile: SourceFile, useDecorators: boolean): void;
 }
 declare namespace ts.reflection {
     function setConfig(host: CompilerHost, options: CompilerOptions): void;

@@ -27,7 +27,7 @@ namespace ts.reflection {
 		let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
 		
         if(configuration && configuration.reflectionEnabled) {
-            injectReflectionHooks(sourceFile);
+            injectReflectionHooks(sourceFile, useDecorators);
         }
 
     }

@@ -7348,7 +7348,7 @@ declare namespace ts.reflection {
         private store(value);
         private pos();
     }
-    function injectReflectionHooks(sourceFile: SourceFile, useDecorators?: boolean): void;
+    function injectReflectionHooks(sourceFile: SourceFile, useDecorators: boolean): void;
 }
 declare namespace ts.reflection {
     function setConfig(host: CompilerHost, options: CompilerOptions): void;
