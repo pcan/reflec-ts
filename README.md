@@ -46,6 +46,8 @@ node built/local/tsc.js -p /path/to/project/
 
 or you can reference `typescriptServices.js` in your IDE.
 
+Include `runtime-types/reflection.d.ts` in your project.
+
 ## How to enable reflection
 
 Open `tsconfig.json` and add `"reflectionEnabled": true`, like the following snippet:

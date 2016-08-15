@@ -2,7 +2,7 @@
     "name": "reflec-ts",
     "author": "Pierantonio Cangianiello",
     "homepage": "https://github.com/pcan/reflec-ts",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "MIT",
     "description": "TypeScript compiler with Reflection capabilities",
     "keywords": [
@@ -31,8 +31,8 @@
     },
     "devDependencies": {
         "@types/browserify": "latest",
-        "@types/convert-source-map": "latest",
         "@types/chai": "latest",
+        "@types/convert-source-map": "latest",
         "@types/del": "latest",
         "@types/glob": "latest",
         "@types/gulp": "latest",
@@ -73,13 +73,14 @@
         "run-sequence": "latest",
         "sorcery": "latest",
         "through2": "latest",
+        "travis-fold": "latest",
         "ts-node": "latest",
         "tslint": "next",
         "typescript": "next"
     },
     "scripts": {
         "pretest": "jake tests",
-        "test": "jake runtests",
+        "test": "jake runtests-parallel",
         "build": "npm run build:compiler && npm run build:tests",
         "build:compiler": "jake local",
         "build:tests": "jake tests",
