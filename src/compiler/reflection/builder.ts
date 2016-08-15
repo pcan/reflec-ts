@@ -179,8 +179,8 @@ namespace ts.reflection {
     /**
      * AST enhancement entry point.
      */
-    export function injectReflectionHooks(sourceFile: SourceFile) {
-        const decoratorsEnabled = true; //TODO: read configuration...
+    export function injectReflectionHooks(sourceFile: SourceFile, useDecorators?: boolean) {
+        const decoratorsEnabled = useDecorators;
 
         const builder = new SourceASTBuilder(sourceFile);
         const reflectionObjectLiteral = builder.createTypeLiteral([]);

@@ -24,7 +24,8 @@ namespace ts.reflection {
     export function addReflectionToAST(sourceFile: SourceFile) { //, createNode: (kind: SyntaxKind, pos?: number) => Node | Token | Identifier): void {
 
         configuration = configuration || buildConfiguration();
-
+		let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
+		
         if(configuration && configuration.reflectionEnabled) {
             injectReflectionHooks(sourceFile);
         }
