@@ -275,7 +275,7 @@ namespace ts.reflection {
 
     export const contentFooter = `
     Reflection.registerPackage = function(name) {
-        console.log('Registering package: ' + name);
+        //console.log('Registering package: ' + name);
         var pkg = Reflection.$libs['default'][name];
         pkg.registerClass = function(ctor, metadata) {
             //console.log('Registering constructor: ' + ctor.name);
