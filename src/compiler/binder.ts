@@ -89,9 +89,10 @@ namespace ts {
     const binder = createBinder();
 
     export function bindSourceFile(file: SourceFile, options: CompilerOptions) {
-        const start = performance.mark();
+        performance.mark("beforeBind");
         binder(file, options);
-        performance.measure("Bind", start);
+        performance.mark("afterBind");
+        performance.measure("Bind", "beforeBind", "afterBind");
     }
 
     function createBinder(): (file: SourceFile, options: CompilerOptions) => void {
@@ -1971,7 +1972,18 @@ namespace ts {
                 assignee = container;
             }
             else if (container.kind === SyntaxKind.Constructor) {
-                assignee = container.parent;
+                if (isInJavaScriptFile(node)) {
+                    // this.foo assignment in a JavaScript class
+                    // Bind this property to the containing class
+                    const saveContainer = container;
+                    container = container.parent;
+                    bindPropertyOrMethodOrAccessor(node, SymbolFlags.Property, SymbolFlags.None);
+                    container = saveContainer;
+                    return;
+                }
+                else {
+                    assignee = container.parent;
+                }
             }
             else {
                 return;

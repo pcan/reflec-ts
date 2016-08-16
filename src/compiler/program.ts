@@ -858,9 +858,10 @@ namespace ts {
         function getSourceFile(fileName: string, languageVersion: ScriptTarget, onError?: (message: string) => void): SourceFile {
             let text: string;
             try {
-                const start = performance.mark();
+                performance.mark("beforeIORead");
                 text = sys.readFile(fileName, options.charset);
-                performance.measure("I/O Read", start);
+                performance.mark("afterIORead");
+                performance.measure("I/O Read", "beforeIORead", "afterIORead");
             }
             catch (e) {
                 if (onError) {
@@ -927,7 +928,7 @@ namespace ts {
 
         function writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError?: (message: string) => void) {
             try {
-                const start = performance.mark();
+                performance.mark("beforeIOWrite");
                 ensureDirectoriesExist(getDirectoryPath(normalizePath(fileName)));
 
                 if (isWatchSet(options) && sys.createHash && sys.getModifiedTime) {
@@ -937,7 +938,8 @@ namespace ts {
                     sys.writeFile(fileName, data, writeByteOrderMark);
                 }
 
-                performance.measure("I/O Write", start);
+                performance.mark("afterIOWrite");
+                performance.measure("I/O Write", "beforeIOWrite", "afterIOWrite");
             }
             catch (e) {
                 if (onError) {
@@ -1120,7 +1122,7 @@ namespace ts {
         // Track source files that are source files found by searching under node_modules, as these shouldn't be compiled.
         const sourceFilesFoundSearchingNodeModules = createMap<boolean>();
 
-        const start = performance.mark();
+        performance.mark("beforeProgram");
 
         host = host || createCompilerHost(options);
 
@@ -1218,8 +1220,8 @@ namespace ts {
         };
 
         verifyCompilerOptions();
-
-        performance.measure("Program", start);
+        performance.mark("afterProgram");
+        performance.measure("Program", "beforeProgram", "afterProgram");
 
         return program;
 
@@ -1475,7 +1477,8 @@ namespace ts {
                 getEmitHost(writeFileCallback),
                 sourceFile);
 
-            performance.measure("Emit", start);
+            performance.mark("afterEmit");
+            performance.measure("Emit", "beforeEmit", "afterEmit");
             return emitResult;
         }
 
