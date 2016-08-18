@@ -93,9 +93,8 @@ for (let int of $reflection.MyClass.implements) {
     console.log('Implemented interface: ' + int.name)
 }
 
-for (let name in $reflection.MyClass.members) {
-    let member = $reflection.MyClass.members[name];
-    console.log("Member name: " + name + " - member kind: " + member.kind);
+for (let member of $reflection.MyClass.members) {
+    console.log("Member name: " + member.name + " - member kind: " + member.type.kind);
 }
 ```
 
