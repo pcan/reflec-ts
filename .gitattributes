@@ -1,2 +1,5 @@
 *.js linguist-language=TypeScript
 * -text
+.gitattributes merge=ours
+README.md merge=ours
+./lib/** merge=ours
