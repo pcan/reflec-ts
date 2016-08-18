@@ -1451,9 +1451,10 @@ namespace ts {
             // checked is to not pass the file to getEmitResolver.
             const emitResolver = getDiagnosticsProducingTypeChecker().getEmitResolver((options.outFile || options.out) ? undefined : sourceFile);
 
-            const start = performance.mark();
+            performance.mark("beforeEmit");
 
-            reflection.emitReflectionModule(
+            
+			reflection.emitReflectionModule(
                 emitResolver,
                 getEmitHost(writeFileCallback),
                 program,
