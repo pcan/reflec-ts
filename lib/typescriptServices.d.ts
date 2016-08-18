@@ -318,8 +318,9 @@ declare namespace ts {
         JSDocTypedefTag = 279,
         JSDocPropertyTag = 280,
         JSDocTypeLiteral = 281,
-        SyntaxList = 282,
-        Count = 283,
+        JSDocLiteralType = 282,
+        SyntaxList = 283,
+        Count = 284,
         FirstAssignment = 56,
         LastAssignment = 68,
         FirstReservedWord = 70,
@@ -344,9 +345,9 @@ declare namespace ts {
         LastBinaryOperator = 68,
         FirstNode = 139,
         FirstJSDocNode = 257,
-        LastJSDocNode = 281,
+        LastJSDocNode = 282,
         FirstJSDocTagNode = 273,
-        LastJSDocTagNode = 281,
+        LastJSDocTagNode = 282,
     }
     enum NodeFlags {
         None = 0,
@@ -1040,6 +1041,9 @@ declare namespace ts {
     }
     interface JSDocThisType extends JSDocType {
         type: JSDocType;
+    }
+    interface JSDocLiteralType extends JSDocType {
+        literal: LiteralTypeNode;
     }
     type JSDocTypeReferencingNode = JSDocThisType | JSDocConstructorType | JSDocVariadicType | JSDocOptionalType | JSDocNullableType | JSDocNonNullableType;
     interface JSDocRecordMember extends PropertySignature {
