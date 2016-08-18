@@ -47,7 +47,7 @@ namespace ts.reflection {
             default:
                 let name = type.symbol ? type.symbol.name : 'unknown';
                 debug.warn('exploreType found an unknown type:', name, 'with typeFlags:', type.flags);
-                IntrinsicTypes[TypeFlags.Any];
+                //getIntrinsicType(TypeFlags.Any);
         }
 
         return discoveredTypes;
@@ -95,9 +95,12 @@ namespace ts.reflection {
             let filteredMembers = members.filter(symbol =>
                 symbol.flags === SymbolFlags.Property || symbol.flags === SymbolFlags.Method);
             if (filteredMembers.length > 0) {
-                writeTypeProperty('members').write(' = ').writeObjectStart();
+                writeTypeProperty('members').write(' = ').writeArrayStart();
                 for (let symbol of filteredMembers) {
-                    writer.write(symbol.name + ': ');
+					writer.writeObjectStart()
+						.write(`name: '${symbol.name}',`).writeLine()
+						.write('type: ')
+						//writer.write(symbol.name + ': ');
                     switch (symbol.flags) {
                         case SymbolFlags.Property:
                             writeTypeReferenceForNode(symbol.valueDeclaration);
@@ -106,9 +109,9 @@ namespace ts.reflection {
                             writeMethodMember(symbol);
                             break;
                     }
-                    writer.write(`,`).writeLine();
+                    writer.writeObjectEnd().write(`,`).writeLine();
                 }
-                writer.writeObjectEnd().write(';').writeLine();
+                writer.writeArrayEnd().write(';').writeLine();
             }
         }
 
@@ -120,10 +123,13 @@ namespace ts.reflection {
                 let declaration = <ClassLikeDeclaration>type.symbol.declarations[0];
                 let statics = declaration.members.filter(member => member.flags & NodeFlags.Static);
                 if (statics.length > 0) {
-                    writeTypeProperty('statics').write(' = ').writeObjectStart();
+                    writeTypeProperty('statics').write(' = ').writeArrayStart();
                     for (let member of statics) {
                         let symbol = checker.getSymbolAtLocation(member.name);
-                        writer.write(symbol.name + ': ');
+						writer.writeObjectStart()
+							.write(`name: '${symbol.name}',`).writeLine()
+							.write('type: ')
+                        //writer.write(symbol.name + ': ');
                         switch (symbol.flags) {
                             case SymbolFlags.Property:
                                 writeTypeReferenceForNode(symbol.valueDeclaration);
@@ -132,9 +138,9 @@ namespace ts.reflection {
                                 writeMethodMember(symbol);
                                 break;
                         }
-                        writer.write(`,`).writeLine();
+                        writer.writeObjectEnd().write(`,`).writeLine();
                     }
-                    writer.writeObjectEnd().write(';').writeLine();
+                    writer.writeArrayEnd().write(';').writeLine();
                 }
             }
         }
@@ -417,7 +423,7 @@ namespace ts.reflection {
 
 
         function writeReferenceForType(type: Type): Writer {
-            let intrinsicType = IntrinsicTypes[type.flags]
+            let intrinsicType = getIntrinsicType(type.flags);
             if (intrinsicType) {
                 return writer.write(intrinsicType.varName);
             }

@@ -75,6 +75,8 @@ namespace ts.reflection {
         };
     }
 
+	
+	
     export const IntrinsicTypes: { [index: string]: IntrinsicTypeDescriptor } = {};
 
     IntrinsicTypes[TypeFlags.Any] = buildIntrinsicType('any');
@@ -88,6 +90,11 @@ namespace ts.reflection {
     IntrinsicTypes[TypeFlags.Null] = buildIntrinsicType('null');
     IntrinsicTypes[TypeFlags.Never] = buildIntrinsicType('never');
 
+	export function getIntrinsicType(typeFlags: TypeFlags) {
+		let filtered = typeFlags & 0x3FFF; //from Any to Never (bit 13)
+		return IntrinsicTypes[filtered];
+	}
+	
     export const SerializedTypeKind = { //:{[index: string]: string } ????
         Interface: 'interface',
         Class: 'class',

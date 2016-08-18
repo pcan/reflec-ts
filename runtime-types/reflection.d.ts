@@ -141,10 +141,7 @@ interface TypeAlias extends NamedType {
       * Members for the type. May be undefined.
       * @remarks Contains property, accessor, and method declarations.
       */
-    members?: {
-        [key: string]: Type;
-        [key: number]: Type;
-    };
+    members?: Member[];
 
     /**
       * Construct signatures for the type. May be undefined.
@@ -183,10 +180,7 @@ interface Interface extends NamedType {
       * Members for the type. May be undefined.
       * @remarks Contains property, accessor, and method declarations.
       */
-    members?: {
-        [key: string]: Type;
-        [key: number]: Type;
-    };
+    members?: Member[];
 
     /**
       * Call signatures for the type. May be undefined.
@@ -229,21 +223,13 @@ interface Class extends NamedType {
       * Members for the type. May be undefined.
       * @remarks Contains property, accessor, and method declarations.
       */
-    members?: {
-        [key: string]: Type;
-        [key: number]: Type;
-        // [key: symbol]: Type;
-    };
+    members?: Member[];
 
     /**
       * Static members for the type. May be undefined.
       * @remarks Contains property, accessor, and method declarations.
       */
-    statics?: {
-        [key: string]: Type;
-        [key: number]: Type;
-        // [key: symbol]: Type;
-    };
+    statics?: Member[];
 
     /**
       * Call signatures for the type. May be undefined.
@@ -339,6 +325,13 @@ interface ParameterInfo {
       * The type of the parameter.
       */
     type: Type;
+}
+
+/**
+ * Describes a member of a class or an interface.
+ */
+interface Member extends ParameterInfo {
+
 }
 
 /**

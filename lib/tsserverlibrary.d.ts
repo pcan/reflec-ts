@@ -1863,6 +1863,7 @@ declare namespace ts.reflection {
     const IntrinsicTypes: {
         [index: string]: IntrinsicTypeDescriptor;
     };
+    function getIntrinsicType(typeFlags: TypeFlags): IntrinsicTypeDescriptor;
     const SerializedTypeKind: {
         Interface: string;
         Class: string;
