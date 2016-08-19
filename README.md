@@ -40,10 +40,10 @@ As you can see, the compiler added some features, like `getClass()` method on th
 
 ## Usage
 
-It works exactly like the official TypeScript compiler. You can use `tsc`:
+It works exactly like the official TypeScript compiler. You can use `reflec-tsc`:
 
 ```shell
-node built/local/tsc.js -p /path/to/project/
+reflec-tsc -p /path/to/project/
 ```
 
 or you can reference `typescriptServices.js` in your IDE.
