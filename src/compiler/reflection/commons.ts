@@ -75,8 +75,8 @@ namespace ts.reflection {
         };
     }
 
-	
-	
+
+
     export const IntrinsicTypes: { [index: string]: IntrinsicTypeDescriptor } = {};
 
     IntrinsicTypes[TypeFlags.Any] = buildIntrinsicType('any');
@@ -94,7 +94,7 @@ namespace ts.reflection {
 		let filtered = typeFlags & 0x3FFF; //from Any to Never (bit 13)
 		return IntrinsicTypes[filtered];
 	}
-	
+
     export const SerializedTypeKind = { //:{[index: string]: string } ????
         Interface: 'interface',
         Class: 'class',
@@ -302,6 +302,9 @@ namespace ts.reflection {
     Reflection.classForName = O_o;
     Reflection.classForConstructor = function(ctor) {
         return ctor.prototype[metadataField];
+    };
+    Function.prototype.getClass = function() {
+        return Reflection.classForConstructor(this);
     };
     Reflection.interfaceForName = O_o;
 
