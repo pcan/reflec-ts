@@ -53,6 +53,7 @@ namespace ts.reflection {
                     //nothing of interest for us...
                 }
             }
+            createInterfaceObjectLiterals(statementBlock, pkg);
         }
 
         /**
@@ -64,8 +65,6 @@ namespace ts.reflection {
             if (statement.body && statement.body.kind === ts.SyntaxKind.ModuleBlock) {
                 statement.body.parent = statement;
                 scanStatements(<ts.ModuleBlock>statement.body, pkg);
-                //TODO: create 'const' statement for interfaces on the top of the current package.
-                createInterfaceObjectLiterals(<ts.ModuleBlock>statement.body, pkg);
             }
         }
 

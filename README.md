@@ -36,7 +36,7 @@ Since we modify the AST, types metadata are immediately visible from the IDE (La
 
 ![reflec-ts demo](./doc/images/reflec-ts-demo.gif?raw=true "reflec-ts: working with Atom IDE")
 
-As you can see, the compiler added a new *magic* local object `$reflection` that is automatically exported to be visible to the other modules.
+As you can see, the compiler added some features, like `getClass()` method on the class and `MyInterface` literal, that contains all interface details.
 
 ## Usage
 
@@ -91,11 +91,13 @@ class MyClass implements MyInterface {
 now let's print some useful things about MyClass...
 
 ```TypeScript
-for (let int of $reflection.MyClass.implements) {
+let c: Class = MyClass.getClass();
+
+for (let int of c.implements) {
     console.log('Implemented interface: ' + int.name)
 }
 
-for (let member of $reflection.MyClass.members) {
+for (let member of c.members) {
     console.log("Member name: " + member.name + " - member kind: " + member.type.kind);
 }
 ```
@@ -112,7 +114,8 @@ Member name: doSomething - member kind: function
 now let's build an instance of MyClass from its metadata...
 
 ```TypeScript
-let ctor = $reflection.MyClass.getConstructor<MyClass>();
+let c: Class = MyClass.getClass();
+let ctor = c.getConstructor<MyClass>();
 let myObj = new ctor();
 console.log('myObj instanceof MyClass: ' + (myObj instanceof MyClass));
 myObj.doSomething('nothing :)');

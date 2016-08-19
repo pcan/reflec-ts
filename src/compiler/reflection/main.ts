@@ -27,11 +27,11 @@ namespace ts.reflection {
         let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
 
         if (!isDeclarationFile(sourceFile) && configuration && configuration.reflectionEnabled) {
+            injectReflectionHooks2(sourceFile, useDecorators);
             let b = new SourceASTBuilder(sourceFile);
             let importNode = b.createNode<ImportDeclaration>(SyntaxKind.ImportDeclaration);
             importNode.moduleSpecifier = b.createStringLiteral("*reflection");
             b.commit(importNode);
-            injectReflectionHooks2(sourceFile, useDecorators);
         }
 
     }

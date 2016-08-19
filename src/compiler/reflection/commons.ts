@@ -28,7 +28,7 @@ namespace ts.reflection {
     export const reflectionModuleName = 'Reflection';
     export const reflectionLocalVariableName = '$reflection';
     export const registerPackageFunctionName = 'registerPackage';
-    export const interfaceForNameFunctionName = 'interfaceForName';    
+    export const interfaceForNameFunctionName = 'interfaceForName';
     export const registerClassFunctionName = 'registerClass';
     export const registerClassDecoratorName = 'RegisterClass';
     export const classTypeName = 'Class';
@@ -314,9 +314,9 @@ namespace ts.reflection {
         return type;
     };
     Reflection.registerClass = function(ctor, name) {
-        var fqn = name.split('#');
-        var metadata = Reflection.$libs['default'][fqn[0]][fqn[1]];
+        var metadata = Reflection.classForName(name);
         ctor.prototype[metadataField] = metadata;
+        metadata.getConstructor = function(){ return ctor; };
     };
     Reflection.RegisterClass  = function(name) {
         return function(ctor) {
@@ -326,7 +326,14 @@ namespace ts.reflection {
         }
     };
 
-    Reflection.classForName = O_o;
+    Reflection.classForName = function(pkg, name) {
+        var fqn = name ? [pkg, name] : pkg.split('#');
+        var type = Reflection.$libs['default'][fqn[0]][fqn[1]];
+        if(!type || type.kind !== 'class') {
+            throw new Error('Class not found: '+ name);
+        }
+        return type;
+    };
     Reflection.classForConstructor = function(ctor) {
         return ctor.prototype[metadataField];
     };
