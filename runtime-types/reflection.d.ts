@@ -1,31 +1,30 @@
 
-declare module "*";
-
 declare namespace Reflection {
 
     function getLibraryName(): string; //will return the project name. Multiple libraries might use reflective typescript.
 
     //todo: check 'this.package' and classObject.name/kind.
-    //function registerClass(constructor: Function, classObject: Class); //called by synthetic code.
+    function registerClass(constructor: Function, fullyQualifiedName: string): void;
+
+    //decorator equivalent functionality
+    function RegisterClass(fullyQualifiedName: string) : (any) => void;
+
     //todo: check package property.
     function registerPackage<T>(name: string): T & ReflectionPackage;
 
     function classForName(fullyQualifiedName: string): Class;
-    function classForName(name: string, package: string): Class;
+    function classForName(pkg: string, name: string): Class;
     function classForConstructor(constructor: Function): Class;
 
     function interfaceForName(fullyQualifiedName: string): Interface;
-    function interfaceForName(name: string, package: string): Interface;
+    function interfaceForName(pkg: string, name: string,): Interface;
 }
 
+interface Function {
 
-interface ReflectionPackage {
-    registerClass(constructor: Function, classObject: Class): void;
+    getClass(): Class;
 
-    //decorator equivalent functionality
-    RegisterClass(classObject: Class) : (any) => void;
 }
-
 
 /**
   * Basic shape for a type.

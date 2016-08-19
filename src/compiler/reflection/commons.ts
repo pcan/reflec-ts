@@ -28,6 +28,7 @@ namespace ts.reflection {
     export const reflectionModuleName = 'Reflection';
     export const reflectionLocalVariableName = '$reflection';
     export const registerPackageFunctionName = 'registerPackage';
+    export const interfaceForNameFunctionName = 'interfaceForName';    
     export const registerClassFunctionName = 'registerClass';
     export const registerClassDecoratorName = 'RegisterClass';
     export const classTypeName = 'Class';
@@ -41,6 +42,7 @@ namespace ts.reflection {
 
     export interface TypePackage {
         name: string;
+        fullName:string;
         node: Node;
         parent: TypePackage;
         types?: {
@@ -232,7 +234,11 @@ namespace ts.reflection {
         }
 
         writeObjectPropertyStart(propertyName: string, skipNewLine?: boolean) {
-            return this.write(`${propertyName} : `).writeObjectStart();
+            return this.write(`${propertyName} : `).writeObjectStart(skipNewLine);
+        }
+
+        writeArrayPropertyStart(propertyName: string, skipNewLine?: boolean) {
+            return this.write(`${propertyName} : `).writeArrayStart(skipNewLine);
         }
 
     }
@@ -299,6 +305,27 @@ namespace ts.reflection {
         };
         return pkg;
     };
+    Reflection.interfaceForName = function(pkg, name) {
+        var fqn = name ? [pkg, name] : pkg.split('#');
+        var type = Reflection.$libs['default'][fqn[0]][fqn[1]];
+        if(!type || type.kind !== 'interface') {
+            throw new Error('Interface not found: '+ name);
+        }
+        return type;
+    };
+    Reflection.registerClass = function(ctor, name) {
+        var fqn = name.split('#');
+        var metadata = Reflection.$libs['default'][fqn[0]][fqn[1]];
+        ctor.prototype[metadataField] = metadata;
+    };
+    Reflection.RegisterClass  = function(name) {
+        return function(ctor) {
+            //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
+            Reflection.registerClass(ctor, name);
+            return ctor;
+        }
+    };
+
     Reflection.classForName = O_o;
     Reflection.classForConstructor = function(ctor) {
         return ctor.prototype[metadataField];
@@ -306,7 +333,6 @@ namespace ts.reflection {
     Function.prototype.getClass = function() {
         return Reflection.classForConstructor(this);
     };
-    Reflection.interfaceForName = O_o;
 
     globalObj.${reflectionModuleName} = ${reflectionModuleName}
     \n}(this));`;

@@ -1,10 +1,10 @@
 /// <reference path="./writer.ts"/>
-/// <reference path="./builder.ts"/>
-
+/// <reference path="./builder1.ts"/>
+/// <reference path="./builder2.ts"/>
 
 namespace ts.reflection {
     //TODO: check if Reflection already exists.
-    var configuration:any; //hack: we don't want to change all signatures from program.ts to main.ts in order to pass configuration.
+    var configuration: any; //hack: we don't want to change all signatures from program.ts to main.ts in order to pass configuration.
     let compilerHost: CompilerHost;
     let compilerOptions: CompilerOptions;
 
@@ -15,19 +15,23 @@ namespace ts.reflection {
 
     function buildConfiguration() {
         const configFileName = compilerOptions && compilerOptions.configFilePath || compilerHost && findConfigFile(compilerHost.getCurrentDirectory(), sys.fileExists);
-        if(configFileName) {
+        if (configFileName) {
             return readConfigFile(configFileName, sys.readFile).config;
         }
         return null;
     }
 
-    export function addReflectionToAST(sourceFile: SourceFile) { //, createNode: (kind: SyntaxKind, pos?: number) => Node | Token | Identifier): void {
+    export function addReflectionToAST(sourceFile: SourceFile) {
 
         configuration = configuration || buildConfiguration();
-		let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
-		
-        if(configuration && configuration.reflectionEnabled) {
-            injectReflectionHooks(sourceFile, useDecorators);
+        let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
+
+        if (!isDeclarationFile(sourceFile) && configuration && configuration.reflectionEnabled) {
+            let b = new SourceASTBuilder(sourceFile);
+            let importNode = b.createNode<ImportDeclaration>(SyntaxKind.ImportDeclaration);
+            importNode.moduleSpecifier = b.createStringLiteral("*reflection");
+            b.commit(importNode);
+            injectReflectionHooks2(sourceFile, useDecorators);
         }
 
     }
@@ -56,9 +60,22 @@ namespace ts.reflection {
                     getDirectoryPath(getOwnEmitOutputFilePath(file, host, '.js')),
                     host.getCanonicalFileName);
                 let b = new SourceASTBuilder(file);
-                let importNode = b.createNode<ImportDeclaration>(SyntaxKind.ImportDeclaration);
-                importNode.moduleSpecifier = b.createStringLiteral(name);
-                b.commit(importNode);
+
+                for (let statement of file.statements) {
+                    if (statement.kind === SyntaxKind.ImportDeclaration && (<ImportDeclaration>statement).moduleSpecifier) {
+                        let specifier = <Identifier>(<ImportDeclaration>statement).moduleSpecifier;
+                        if (specifier && specifier.text === `'*reflection'`) {
+                            //we use this fake literal to change the fake reflection import with the real one.
+                            let literal = b.createStringLiteral(name);
+                            b.commit();
+                            specifier.text = literal.text;
+                            specifier.pos = literal.pos;
+                            specifier.end = literal.end;
+                            break;
+                        }
+                    }
+                }
+
                 let relativePath = convertToRelativePath(removeFileExtension(file.fileName), dir, host.getCanonicalFileName);
                 //we use this fake literal to change the full package name to the short one.
                 let tempLiteral = b.createStringLiteral(relativePath.replace(/[\/\\]/g, '.'));
@@ -102,7 +119,6 @@ namespace ts.reflection {
             for (let sourceFile of sourceFiles) {
                 if (sourceFile.$packageNameLiteral && !isDeclarationFile(sourceFile)) {
                     emitReflectionForSourceFile(sourceFile);
-                    writer.write(',').writeLine();
                 }
             }
             writer.decreaseIndent().writeLine().write(`};`);
@@ -110,8 +126,9 @@ namespace ts.reflection {
 
         function emitReflectionForSourceFile(sourceFile: SourceFile) {
             writer.writeObjectPropertyStart(sourceFile.$packageNameLiteral.text);
-            emitTypePackage(sourceFile.$typePackage);
-            writer.writeObjectEnd();
+            //emitTypePackage(sourceFile.$typePackage);
+            writeFlatTypePackage(sourceFile.$typePackage);
+            writer.writeObjectEnd().write(',').writeLine();
         }
 
         function emitTypePackage(typePackage: TypePackage) {
@@ -137,6 +154,22 @@ namespace ts.reflection {
         }
 
 
+        function writeFlatTypePackage(typePackage: TypePackage) {
+            const rootName = (typePackage.fullName ? typePackage.fullName + '.' : '');
+            let typeDeclaration: TypeDeclaration;
+            for (let typeName in typePackage.types) {
+                typeDeclaration = typePackage.types[typeName];
+                var type = checker.getTypeAtLocation(typeDeclaration);
+                addReflectionInfo(type, typeCounter, typeDeclaration);
+                writer.write(`'${rootName + type.$info.name}': _l[${type.$info.localIndex}],`).writeLine();
+                let derivedTypes = writeType(type, checker, typeCounter, typeWriter);
+                writeDerivedTypes(derivedTypes, checker, typeCounter, derivedTypeWriter);
+            }
+            for (let childPackageName in typePackage.children) {
+                writeFlatTypePackage(typePackage.children[childPackageName]);
+            }
+            return map;
+        }
     }
 
     /**
