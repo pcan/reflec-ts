@@ -14,7 +14,7 @@ namespace ts.reflection {
     }
 
     function buildConfiguration() {
-        const configFileName = compilerOptions && compilerOptions.configFilePath || compilerHost && findConfigFile(compilerHost.getCurrentDirectory(), sys.fileExists);
+        const configFileName = compilerOptions && compilerOptions.configFilePath || compilerHost && sys && sys.fileExists && findConfigFile(compilerHost.getCurrentDirectory(), sys.fileExists);
         if (configFileName) {
             return readConfigFile(configFileName, sys.readFile).config;
         }
