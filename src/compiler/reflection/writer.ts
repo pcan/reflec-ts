@@ -47,7 +47,7 @@ namespace ts.reflection {
             default:
                 let name = type.symbol ? type.symbol.name : 'unknown';
                 debug.warn('exploreType found an unknown type:', name, 'with typeFlags:', type.flags);
-                //getIntrinsicType(TypeFlags.Any);
+            //getIntrinsicType(TypeFlags.Any);
         }
 
         return discoveredTypes;
@@ -97,10 +97,10 @@ namespace ts.reflection {
             if (filteredMembers.length > 0) {
                 writeTypeProperty('members').write(' = ').writeArrayStart();
                 for (let symbol of filteredMembers) {
-					writer.writeObjectStart()
-						.write(`name: '${symbol.name}',`).writeLine()
-						.write('type: ')
-						//writer.write(symbol.name + ': ');
+                    writer.writeObjectStart()
+                        .write(`name: '${symbol.name}',`).writeLine()
+                        .write('type: ')
+                    //writer.write(symbol.name + ': ');
                     switch (symbol.flags) {
                         case SymbolFlags.Property:
                             writeTypeReferenceForNode(symbol.valueDeclaration);
@@ -126,9 +126,9 @@ namespace ts.reflection {
                     writeTypeProperty('statics').write(' = ').writeArrayStart();
                     for (let member of statics) {
                         let symbol = checker.getSymbolAtLocation(member.name);
-						writer.writeObjectStart()
-							.write(`name: '${symbol.name}',`).writeLine()
-							.write('type: ')
+                        writer.writeObjectStart()
+                            .write(`name: '${symbol.name}',`).writeLine()
+                            .write('type: ')
                         //writer.write(symbol.name + ': ');
                         switch (symbol.flags) {
                             case SymbolFlags.Property:
@@ -435,22 +435,6 @@ namespace ts.reflection {
             return writer.write(`${localTypeVar}[${type.$info.localIndex}]`)
         }
 
-    }
-
-
-
-    function getTypeName(type: Type, statement?: Statement | Declaration): string {
-        let name: string;
-        if (statement &&
-            (statement.kind === SyntaxKind.TypeAliasDeclaration
-                || statement.kind === SyntaxKind.ClassDeclaration
-                || statement.kind === SyntaxKind.InterfaceDeclaration)) {
-            let declaration = (<TypeDeclaration>statement);
-            name = declaration && declaration.name ? declaration.name.text : type.symbol.name;
-        } else {
-            name = type.symbol.name;
-        }
-        return name;
     }
 
     function isArrayType(type: ts.Type) {

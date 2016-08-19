@@ -197,7 +197,11 @@ namespace ts.reflection {
      * Checks for declared type literals with the same name and kind of the given typeDeclaration.
      */
     export function existsTypeDeclarationDuplicate(statement: TypeDeclaration, pkg: TypePackage) {
-        return !!pkg.types[getKeyForNameAndKind(statement.name.text, statement.kind)];
+        return !!pkg.types[getKeyForNameAndKind(getDeclarationName(statement), statement.kind)];
+    }
+
+    export function getDeclarationName(decl : DeclarationStatement) {
+        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & SyntaxKind.DefaultClause ? 'default' : '???';
     }
 
 }

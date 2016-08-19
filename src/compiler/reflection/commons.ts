@@ -114,7 +114,8 @@ namespace ts.reflection {
                 || statement.kind === SyntaxKind.ClassDeclaration
                 || statement.kind === SyntaxKind.InterfaceDeclaration)) {
             let declaration = (<TypeDeclaration>statement);
-            name = declaration && declaration.name ? declaration.name.text : type.symbol.name;
+            name = getDeclarationName(declaration);
+            name = name ? name : type.symbol.name;
         } else {
             name = type.symbol.name;
         }

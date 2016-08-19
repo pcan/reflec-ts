@@ -53,14 +53,14 @@ namespace ts.reflection {
                     //nothing of interest for us...
                 }
             }
-            createInterfaceObjectLiterals(statementBlock, pkg);
+            createInterfaceVariableInits(statementBlock, pkg);
         }
 
         /**
          * Creates a new TypePackage from a module declaration and starts the deep scanning.
          */
-        function scanModuleDeclaration(parent: TypePackage, statement: ts.ModuleDeclaration) {
-            let pkg: TypePackage = createTypePackage(statement.name.text, statement, parent);
+        function scanModuleDeclaration(parent: TypePackage, statement: ModuleDeclaration) {
+            let pkg: TypePackage = createTypePackage(getDeclarationName(statement), statement, parent);
             parent.children[pkg.name] = pkg;
             if (statement.body && statement.body.kind === ts.SyntaxKind.ModuleBlock) {
                 statement.body.parent = statement;
@@ -70,39 +70,42 @@ namespace ts.reflection {
 
 
         function scanInterfaceDeclaration(statement: InterfaceDeclaration, pkg: TypePackage) {
-            if (statement.name && statement.name.text && !existsTypeDeclarationDuplicate(statement, pkg)) {
-                pkg.types[getKeyForNameAndKind(statement.name.text, statement.kind)] = statement;
+            if (!existsTypeDeclarationDuplicate(statement, pkg)) {
+                pkg.types[getKeyForNameAndKind(getDeclarationName(statement), statement.kind)] = statement;
             }
         }
 
-        function createInterfaceObjectLiterals(statementBlock: StatementsBlock, pkg: TypePackage) {
+        function createInterfaceVariableInits(statementBlock: StatementsBlock, pkg: TypePackage) {
             let declaration: DeclarationStatement;
             let collidingType: DeclarationStatement;
             for (let typeName in pkg.types) {
                 declaration = pkg.types[typeName];
                 if (declaration.kind === SyntaxKind.InterfaceDeclaration) {
                     //check if a class with the same name exists. Do nothing in this case.
-                    collidingType = pkg.types[getKeyForNameAndKind(declaration.name.text, SyntaxKind.ClassDeclaration)];
+                    collidingType = pkg.types[getKeyForNameAndKind(getDeclarationName(declaration), SyntaxKind.ClassDeclaration)];
                     if (!collidingType) {
-                        createInterfaceObjectLiteral(<InterfaceDeclaration>declaration, statementBlock, pkg);
+                        createInterfaceVariableInit(<InterfaceDeclaration>declaration, statementBlock, pkg);
                     }
                 }
             }
         }
 
-        function createInterfaceObjectLiteral(declaration: InterfaceDeclaration, statementBlock: StatementsBlock, pkg: TypePackage) {
+        /**
+         * Creates the 'var MyInterface = Reflection.interfaceForName("....")' statement.
+         */
+        function createInterfaceVariableInit(declaration: InterfaceDeclaration, statementBlock: StatementsBlock, pkg: TypePackage) {
 
             const modifiers = declaration.flags & NodeFlags.Export
                 ? builder.createModifiersArray(NodeFlags.Export | NodeFlags.Const, [builder.createNode<Modifier>(SyntaxKind.ExportKeyword)])
                 : builder.createModifiersArray(NodeFlags.Const, []);
 
-            const statement = builder.createVariableInitializerStatement(declaration.name.text,
+            const statement = builder.createVariableInitializerStatement(getDeclarationName(declaration),
                 builder.createCallExpression(
-                    builder.createPropertyAccessExpression( //Reflection.registerPackage
+                    builder.createPropertyAccessExpression( //Reflection.interfaceForName
                         interfaceForNameFunctionName,
                         builder.createIdentifier(reflectionModuleName)
                     ),
-                    [getFullyQualifiedTypeName(pkg, declaration.name.text)],
+                    [getFullyQualifiedTypeName(pkg, getDeclarationName(declaration))],
                 ),
                 modifiers
             );
@@ -117,8 +120,8 @@ namespace ts.reflection {
          * adds the @$reflection.RegisterClass() decorator
          */
         function addRegisterClassDecorator(declaration: ClassDeclaration, pkg: TypePackage) {
-            if (declaration.name && declaration.name.text && !existsTypeDeclarationDuplicate(declaration, pkg)) {
-                pkg.types[getKeyForNameAndKind(declaration.name.text, declaration.kind)] = declaration;
+            if (!existsTypeDeclarationDuplicate(declaration, pkg)) {
+                pkg.types[getKeyForNameAndKind(getDeclarationName(declaration), declaration.kind)] = declaration;
                 declaration.decorators = declaration.decorators || <NodeArray<Decorator>>[];
                 let decorator = builder.createNode<Decorator>(SyntaxKind.Decorator);
                 decorator.expression = builder.createCallExpression(
@@ -126,7 +129,7 @@ namespace ts.reflection {
                         registerClassDecoratorName,
                         builder.createIdentifier(reflectionModuleName)
                     ), [
-                        getFullyQualifiedTypeName(pkg, declaration.name.text)
+                        getFullyQualifiedTypeName(pkg, getDeclarationName(declaration))
                     ]
                 )
                 declaration.decorators.push(decorator);
@@ -146,16 +149,16 @@ namespace ts.reflection {
          * Creates the registerClass(...) statement.
          */
         function createRegisterClassCallStatement(declaration: ClassDeclaration, pkg: TypePackage): Statement {
-            if (declaration.name && declaration.name.text && !existsTypeDeclarationDuplicate(declaration, pkg)) {
-                pkg.types[getKeyForNameAndKind(declaration.name.text, declaration.kind)] = declaration;
+            if (!existsTypeDeclarationDuplicate(declaration, pkg)) {
+                pkg.types[getKeyForNameAndKind(getDeclarationName(declaration), declaration.kind)] = declaration;
                 let callStatement = builder.createExpressionStatement(
                     builder.createCallExpression(
                         builder.createPropertyAccessExpression( //Reflection.registerClass
                             registerClassFunctionName,
                             builder.createIdentifier(reflectionModuleName)
                         ), [
-                            builder.createIdentifier(declaration.name.text), //MyClass
-                            getFullyQualifiedTypeName(pkg, declaration.name.text)
+                            builder.createIdentifier(getDeclarationName(declaration)), //MyClass
+                            getFullyQualifiedTypeName(pkg, getDeclarationName(declaration))
                         ]
                     )
                 );
@@ -163,10 +166,6 @@ namespace ts.reflection {
             }
         }
 
-
-
-
     }
-
 
 }
