@@ -1,6 +1,7 @@
 # reflec-ts
 
 A enhanced (unofficial) version of the [official TypeScript compiler](https://github.com/Microsoft/TypeScript) that provides Reflection capabilities.
+
 **Warning:** I'm improving the runtime API: some details will change until the first stable version. Keep your npm registry updated and feel free to submit issues/suggestions.
 
 ## Installing
