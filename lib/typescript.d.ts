@@ -1902,6 +1902,7 @@ declare namespace ts.reflection {
     const reflectionModuleName: string;
     const reflectionLocalVariableName: string;
     const registerPackageFunctionName: string;
+    const interfaceForNameFunctionName: string;
     const registerClassFunctionName: string;
     const registerClassDecoratorName: string;
     const classTypeName: string;
@@ -1911,6 +1912,7 @@ declare namespace ts.reflection {
     const tempTypeVar: string;
     interface TypePackage {
         name: string;
+        fullName: string;
         node: Node;
         parent: TypePackage;
         types?: {
@@ -1977,6 +1979,7 @@ declare namespace ts.reflection {
         writeDelimiterStart(delimiterStart: string, skipNewLine?: boolean): this;
         writeDelimiterEnd(delimiterEnd: string, skipNewLine?: boolean): this;
         writeObjectPropertyStart(propertyName: string, skipNewLine?: boolean): this;
+        writeArrayPropertyStart(propertyName: string, skipNewLine?: boolean): this;
     }
     function valuesOf<T>(dataObject: {
         [index: string]: T;
@@ -2022,10 +2025,24 @@ declare namespace ts.reflection {
         private store(value);
         private pos();
     }
+    function createTypePackage(name: string, node: Node, parent: TypePackage): TypePackage;
+    /**
+     * Converts name = NAME and kind = SyntaxKind.KIND to NAME:KIND
+     */
+    function getKeyForNameAndKind(name: string, kind: SyntaxKind): string;
+    /**
+     * Checks for declared type literals with the same name and kind of the given typeDeclaration.
+     */
+    function existsTypeDeclarationDuplicate(statement: TypeDeclaration, pkg: TypePackage): boolean;
+}
+declare namespace ts.reflection {
     /**
      * AST enhancement entry point.
      */
-    function injectReflectionHooks(sourceFile: SourceFile, useDecorators: boolean): void;
+    function injectReflectionHooks1(sourceFile: SourceFile, useDecorators: boolean): void;
+}
+declare namespace ts.reflection {
+    function injectReflectionHooks2(sourceFile: SourceFile, useDecorators: boolean): void;
 }
 declare namespace ts.reflection {
     function setConfig(host: CompilerHost, options: CompilerOptions): void;
