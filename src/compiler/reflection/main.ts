@@ -2,10 +2,16 @@
 /// <reference path="./builder1.ts"/>
 /// <reference path="./builder2.ts"/>
 
+namespace ts {
+    export function setReflectionCompilerOptions(compilerOptions: CompilerOptions){
+        reflection.setConfig(null, compilerOptions);
+    }
+}
+
 /* @internal */
 namespace ts.reflection {
     //TODO: check if Reflection already exists.
-    var configuration: any; //hack: we don't want to change all signatures from program.ts to main.ts in order to pass configuration.
+
     let compilerHost: CompilerHost;
     let compilerOptions: CompilerOptions;
 
@@ -14,23 +20,29 @@ namespace ts.reflection {
         compilerOptions = options;
     }
 
-    function buildConfiguration() {
+    function initConfiguration() {
+        if(compilerOptions && compilerOptions.reflectionEnabled) {
+            return compilerOptions;
+        }
+
         const configFileName = compilerOptions && compilerOptions.configFilePath || compilerHost && sys && sys.fileExists && findConfigFile(compilerHost.getCurrentDirectory(), sys.fileExists);
         if (configFileName) {
-            return readConfigFile(configFileName, sys.readFile).config;
+            let config = readConfigFile(configFileName, sys.readFile).config;
+            config.compilerOptions = config.compilerOptions || {};
+            if(config.reflectionEnabled) {
+                config.compilerOptions.reflectionEnabled = true;
+            }
+            compilerOptions = config.compilerOptions;
         }
-        return null;
     }
 
     export function addReflectionToAST(sourceFile: SourceFile) {
-
-        configuration = configuration || buildConfiguration();
-        let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
-
-        if (!isDeclarationFile(sourceFile) && sourceFile.statements.length > 0 && configuration && configuration.reflectionEnabled) {
+        initConfiguration();
+        if (!isDeclarationFile(sourceFile) && sourceFile.statements.length > 0 && compilerOptions && compilerOptions.reflectionEnabled) {
+            const useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
             injectReflectionHooks2(sourceFile, useDecorators);
-            let b = new SourceASTBuilder(sourceFile);
-            let importNode = b.createNode<ImportDeclaration>(SyntaxKind.ImportDeclaration);
+            const b = new SourceASTBuilder(sourceFile);
+            const importNode = b.createNode<ImportDeclaration>(SyntaxKind.ImportDeclaration);
             importNode.moduleSpecifier = b.createStringLiteral("*reflection");
             b.commit(importNode);
         }
@@ -38,7 +50,7 @@ namespace ts.reflection {
     }
 
     export function emitReflectionModule(resolver: EmitResolver, host: EmitHost, program: Program, sourceFile: SourceFile) {
-        if (!configuration || !configuration.reflectionEnabled) {
+        if (!compilerOptions || !compilerOptions.reflectionEnabled) {
             return;
         }
 
@@ -52,7 +64,7 @@ namespace ts.reflection {
             host.writeFile(reflectionFileName, reflectionFileContent, host.getCompilerOptions().emitBOM);
         }
 
-        configuration = null;
+        compilerOptions = null;
 
         function addReflectionImport(file: SourceFile) {
             if (file.$packageNameLiteral && !isDeclarationFile(file)) {

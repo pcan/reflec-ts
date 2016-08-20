@@ -81,6 +81,12 @@ class CompilerBaselineRunner extends RunnerBase {
                     assert.equal(testCaseContent.tsConfig.fileNames.length, 0, `list of files in tsconfig is not currently supported`);
 
                     tsConfigOptions = ts.clone(testCaseContent.tsConfig.options);
+                    if (testCaseContent.tsConfig.raw && testCaseContent.tsConfig.raw.reflectionEnabled) {
+                        tsConfigOptions['reflectionEnabled'] = true;
+                        ts.setReflectionCompilerOptions(tsConfigOptions);
+                        Harness.lightMode = true;
+                    }
+
                 }
                 else {
                     const baseUrl = harnessSettings["baseUrl"];

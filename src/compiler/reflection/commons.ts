@@ -344,6 +344,6 @@ namespace ts.reflection {
     };
 
     globalObj.${reflectionModuleName} = ${reflectionModuleName}
-    \n}(this));`;
+    \n}(this));\n\n`;
 
 }

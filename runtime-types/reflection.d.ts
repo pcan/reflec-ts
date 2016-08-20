@@ -10,7 +10,7 @@ declare namespace Reflection {
     function RegisterClass(fullyQualifiedName: string) : (any) => void;
 
     //todo: check package property.
-    function registerPackage<T>(name: string): T & ReflectionPackage;
+    function registerPackage<T>(name: string): T;
 
     function classForName(fullyQualifiedName: string): Class;
     function classForName(pkg: string, name: string): Class;
