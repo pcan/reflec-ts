@@ -3789,7 +3789,11 @@ namespace ts {
                     // other than those within the declared type.
                     isNewIdentifierLocation = true;
 
+                    // If the object literal is being assigned to something of type 'null | { hello: string }',
+                    // it clearly isn't trying to satisfy the 'null' type. So we grab the non-nullable type if possible.
                     typeForObject = typeChecker.getContextualType(<ObjectLiteralExpression>objectLikeContainer);
+                    typeForObject = typeForObject && typeForObject.getNonNullableType();
+
                     existingMembers = (<ObjectLiteralExpression>objectLikeContainer).properties;
                 }
                 else if (objectLikeContainer.kind === SyntaxKind.ObjectBindingPattern) {
@@ -3801,7 +3805,7 @@ namespace ts {
                         // We don't want to complete using the type acquired by the shape
                         // of the binding pattern; we are only interested in types acquired
                         // through type declaration or inference.
-                        // Also proceed if rootDeclaration is parameter and if its containing function expression\arrow function is contextually typed -
+                        // Also proceed if rootDeclaration is a parameter and if its containing function expression/arrow function is contextually typed -
                         // type of parameter will flow in from the contextual type of the function
                         let canGetType = !!(rootDeclaration.initializer || rootDeclaration.type);
                         if (!canGetType && rootDeclaration.kind === SyntaxKind.Parameter) {
@@ -4913,6 +4917,28 @@ namespace ts {
 
             if (!documentation) {
                 documentation = symbol.getDocumentationComment();
+                if (documentation.length === 0 && symbol.flags & SymbolFlags.Property) {
+                    // For some special property access expressions like `experts.foo = foo` or `module.exports.foo = foo`
+                    // there documentation comments might be attached to the right hand side symbol of their declarations.
+                    // The pattern of such special property access is that the parent symbol is the symbol of the file.
+                    if (symbol.parent && forEach(symbol.parent.declarations, declaration => declaration.kind === SyntaxKind.SourceFile)) {
+                        for (const declaration of symbol.declarations) {
+                            if (!declaration.parent || declaration.parent.kind !== SyntaxKind.BinaryExpression) {
+                                continue;
+                            }
+
+                            const rhsSymbol = program.getTypeChecker().getSymbolAtLocation((<BinaryExpression>declaration.parent).right);
+                            if (!rhsSymbol) {
+                                continue;
+                            }
+
+                            documentation = rhsSymbol.getDocumentationComment();
+                            if (documentation.length > 0) {
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             return { displayParts, documentation, symbolKind };
