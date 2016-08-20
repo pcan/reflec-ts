@@ -16,7 +16,7 @@
 /// <reference path='services.ts' />
 
 /* @internal */
-let debugObjectHost: any = new Function("return this")();
+let debugObjectHost: any = undefined; // new Function("return this")();
 
 // We need to use 'null' to interface with the managed side.
 /* tslint:disable:no-null-keyword */

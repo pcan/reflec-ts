@@ -27,7 +27,7 @@ namespace ts.reflection {
         configuration = configuration || buildConfiguration();
         let useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
 
-        if (!isDeclarationFile(sourceFile) && configuration && configuration.reflectionEnabled) {
+        if (!isDeclarationFile(sourceFile) && sourceFile.statements.length > 0 && configuration && configuration.reflectionEnabled) {
             injectReflectionHooks2(sourceFile, useDecorators);
             let b = new SourceASTBuilder(sourceFile);
             let importNode = b.createNode<ImportDeclaration>(SyntaxKind.ImportDeclaration);

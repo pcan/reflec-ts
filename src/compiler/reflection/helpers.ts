@@ -135,6 +135,9 @@ namespace ts.reflection {
                 statement.parent = parent;
             }
             this.sourceFile.text += (this.buffer + '\n');
+            this.sourceFile.endOfFileToken = this.sourceFile.endOfFileToken || this.createNode<Node>(SyntaxKind.EndOfFileToken);
+            this.sourceFile.endOfFileToken.pos=this.sourceFile.text.length;
+            this.sourceFile.endOfFileToken.end=this.sourceFile.text.length;
             this.buffer = '\n//';
         }
 
@@ -202,7 +205,7 @@ namespace ts.reflection {
     }
 
     export function getDeclarationName(decl : DeclarationStatement) {
-        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & SyntaxKind.DefaultClause ? 'default' : '???';
+        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & SyntaxKind.DefaultClause ? 'default' : '';
     }
 
 }
