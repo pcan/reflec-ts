@@ -1,0 +1,20 @@
+=== c:/root/file1.ts ===
+
+class Pippo {
+> : (any: any) => void
+> : (fullyQualifiedName: string) => (any: any) => void
+> : string
+>Pippo : Pippo
+	
+}
+
+let a = Pippo.getClass().name;
+>a : string
+>Pippo.getClass().name : string
+>Pippo.getClass() : Class
+>Pippo.getClass : () => Class
+>Pippo : typeof Pippo
+>getClass : () => Class
+>name : string
+
+
