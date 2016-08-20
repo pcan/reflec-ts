@@ -1,4 +1,4 @@
-
+/* @internal */
 namespace ts {
 
     export interface Type {
@@ -23,6 +23,7 @@ namespace ts {
 
 }
 
+/* @internal */
 namespace ts.reflection {
 
     export const reflectionModuleName = 'Reflection';

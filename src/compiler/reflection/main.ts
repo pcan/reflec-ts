@@ -2,6 +2,7 @@
 /// <reference path="./builder1.ts"/>
 /// <reference path="./builder2.ts"/>
 
+/* @internal */
 namespace ts.reflection {
     //TODO: check if Reflection already exists.
     var configuration: any; //hack: we don't want to change all signatures from program.ts to main.ts in order to pass configuration.

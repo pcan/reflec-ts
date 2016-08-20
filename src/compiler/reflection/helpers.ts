@@ -1,5 +1,6 @@
 /// <reference path="./commons.ts"/>
 
+/* @internal */
 namespace ts.reflection {
 
     /**

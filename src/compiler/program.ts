@@ -1453,8 +1453,8 @@ namespace ts {
 
             performance.mark("beforeEmit");
 
-            
-			reflection.emitReflectionModule(
+
+            reflection.emitReflectionModule(
                 emitResolver,
                 getEmitHost(writeFileCallback),
                 program,
