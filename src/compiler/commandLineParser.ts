@@ -28,6 +28,10 @@ namespace ts {
             type: "boolean",
         },
         {
+            name: "reflectionEnabled",
+            type: "boolean",
+        },
+        {
             name: "extendedDiagnostics",
             type: "boolean",
         },

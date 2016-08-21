@@ -255,6 +255,14 @@ namespace FourSlash {
             this.languageServiceAdapterHost = languageServiceAdapter.getHost();
             this.languageService = languageServiceAdapter.getLanguageService();
 
+			// Files from tests\lib that are requested by "@libFiles"
+			if (this.testData.globalOptions && this.testData.globalOptions['libFiles']) {
+                for (const fileName of this.testData.globalOptions['libFiles'].split(",")) {
+                    const libFileName = "tests/lib/" + fileName;
+                    testData.files.push({ fileName: libFileName, content: Harness.IO.readFile(libFileName), version: 1, fileOptions: this.testData.globalOptions });
+                }
+            }
+			
             // Initialize the language service with all the scripts
             let startResolveFileRef: FourSlashFile;
 
@@ -2257,6 +2265,7 @@ namespace FourSlash {
     export function runFourSlashTestContent(basePath: string, testType: FourSlashTestType, content: string, fileName: string): void {
         // Parse out the files and their metadata
         const testData = parseTestData(basePath, content, fileName);
+		
         const state = new TestState(basePath, testType, testData);
         const output = ts.transpileModule(content, { reportDiagnostics: true });
         if (output.diagnostics.length > 0) {
