@@ -7,7 +7,7 @@ declare namespace Reflection {
     function registerClass(constructor: Function, fullyQualifiedName: string): void;
 
     //decorator equivalent functionality
-    function RegisterClass(fullyQualifiedName: string) : (any) => void;
+    function RegisterClass(fullyQualifiedName: string) : (target: any) => void;
 
     //todo: check package property.
     function registerPackage<T>(name: string): T;
@@ -248,7 +248,7 @@ interface Class extends NamedType {
     /**
       * The constructor function for the class.
       */
-    getConstructor?<T>(): new (...args) => T;
+    getConstructor?<T>(): new (...args: any[]) => T;
 }
 
 /**

@@ -48,7 +48,7 @@ reflec-tsc -p /path/to/project/
 
 or you can reference `typescriptServices.js` in your IDE.
 
-~~Include `runtime-types/reflection.d.ts` in your project.~~ Now `reflection.d.ts` is included in `lib.d.ts`; if your IDE supports it, you can point to this file that contains Reflection definitions, too.
+~~Include `runtime-types/reflection.d.ts` in your project.~~ Now `reflection.d.ts` is included in `lib.d.ts`; if your IDE supports it, you can point to this file which contains Reflection definitions, too.
 
 ### How to enable reflection
 
