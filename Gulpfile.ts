@@ -134,7 +134,7 @@ const es2017LibrarySourceMap = es2017LibrarySource.map(function(source) {
     return { target: "lib." + source, sources: ["header.d.ts", source] };
 });
 
-const hostsLibrarySources = ["dom.generated.d.ts", "webworker.importscripts.d.ts", "scripthost.d.ts"];
+const hostsLibrarySources = ["dom.generated.d.ts", "webworker.importscripts.d.ts", "scripthost.d.ts", "reflection.d.ts"];
 
 const librarySourceMap = [
     // Host library
