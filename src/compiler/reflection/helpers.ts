@@ -172,7 +172,6 @@ namespace ts.reflection {
             if (n.parent !== parent) {
                 n.parent = parent;
                 const saveParent = parent;
-                parent.end = Math.max(parent.end, n.end);
                 parent = n;
                 forEachChild(n, visitNode);
                 parent = saveParent;
