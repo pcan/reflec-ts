@@ -48,7 +48,9 @@ reflec-tsc -p /path/to/project/
 
 or you can reference `typescriptServices.js` in your IDE.
 
-~~Include `runtime-types/reflection.d.ts` in your project.~~ Now `reflection.d.ts` is included in `lib.d.ts`; if your IDE supports it, you can point to this file which contains Reflection definitions, too.
+~~Include `runtime-types/reflection.d.ts` in your project.~~ Now `reflection.d.ts` is included in `lib.d.ts`; if your IDE supports it, you can point to this file which contains Reflection definitions, too. I tested this with the latest release of Atom (using atom-typescript plugin), and it works well.
+
+**Note:** unfortunately, this version seems not to work with Visual Studio 2015. Currently it includes the 1.8.x branch of the compiler, maybe we have to wait for 2.x compatibility.
 
 ### How to enable reflection
 
@@ -115,7 +117,7 @@ now let's build an instance of MyClass from its metadata...
 
 ```TypeScript
 let c: Class = MyClass.getClass();
-let ctor = c.getConstructor<MyClass>();
+let ctor = c.getConstructor<any>(); //you may use an interface instead of <any> ;)
 let myObj = new ctor();
 console.log('myObj instanceof MyClass: ' + (myObj instanceof MyClass));
 myObj.doSomething('nothing :)');
