@@ -1,0 +1,29 @@
+=== c:/root/file1.ts ===
+
+
+interface MyInterface {}
+>MyInterface : Symbol(MyInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+
+export default class implements MyInterface {
+>MyInterface : Symbol(MyInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+
+	a: string;
+>a : Symbol(default.a, Decl(file1.ts, 4, 45))
+
+    method() {
+>method : Symbol(default.method, Decl(file1.ts, 5, 11))
+
+        this.constructor.getClass().name;
+>this.constructor.getClass().name : Symbol(NamedType.name, Decl(reflection.d.ts, 63, 34))
+>this.constructor.getClass : Symbol(Function.getClass, Decl(reflection.d.ts, 22, 20))
+>this.constructor : Symbol(Object.constructor, Decl(lib.d.ts, --, --))
+>this : Symbol(default, Decl(file1.ts, 2, 24))
+>constructor : Symbol(Object.constructor, Decl(lib.d.ts, --, --))
+>getClass : Symbol(Function.getClass, Decl(reflection.d.ts, 22, 20))
+>name : Symbol(NamedType.name, Decl(reflection.d.ts, 63, 34))
+    }
+}
+
+
+
+

@@ -1,0 +1,36 @@
+=== c:/root/file1.ts ===
+
+
+interface MyInterface {}
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+>MyInterface : MyInterface
+> : void
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : string
+
+export default class implements MyInterface {
+>MyInterface : MyInterface
+
+	a: string;
+>a : string
+
+    method() {
+>method : () => void
+
+        this.constructor.getClass().name;
+>this.constructor.getClass().name : string
+>this.constructor.getClass() : Class
+>this.constructor.getClass : () => Class
+>this.constructor : Function
+>this : this
+>constructor : Function
+>getClass : () => Class
+>name : string
+    }
+}
+
+
+
+
