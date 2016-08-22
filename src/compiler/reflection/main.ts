@@ -1,6 +1,6 @@
 /// <reference path="./writer.ts"/>
-/// <reference path="./builder1.ts"/>
 /// <reference path="./builder2.ts"/>
+
 
 /* @internal */
 namespace ts.reflection {

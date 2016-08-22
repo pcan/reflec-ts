@@ -1,5 +1,7 @@
 //// [file1.ts]
 
+
+
 class Pippo {
 	
 }

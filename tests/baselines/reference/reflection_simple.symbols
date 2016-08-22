@@ -1,12 +1,14 @@
 === c:/root/file1.ts ===
 
+
+
 class Pippo {
 >Pippo : Symbol(Pippo, Decl(file1.ts, 0, 0))
 	
 }
 
 let a = Pippo.getClass().name;
->a : Symbol(a, Decl(file1.ts, 5, 3))
+>a : Symbol(a, Decl(file1.ts, 7, 3))
 >Pippo.getClass().name : Symbol(NamedType.name, Decl(reflection.d.ts, 63, 34))
 >Pippo.getClass : Symbol(Function.getClass, Decl(reflection.d.ts, 22, 20))
 >Pippo : Symbol(Pippo, Decl(file1.ts, 0, 0))

@@ -79,20 +79,17 @@ class CompilerBaselineRunner extends RunnerBase {
                 let tsConfigOptions: ts.CompilerOptions;
                 if (testCaseContent.tsConfig) {
                     assert.equal(testCaseContent.tsConfig.fileNames.length, 0, `list of files in tsconfig is not currently supported`);
-
                     tsConfigOptions = ts.clone(testCaseContent.tsConfig.options);
-                    if (testCaseContent.tsConfig.raw && testCaseContent.tsConfig.raw.reflectionEnabled || tsConfigOptions.reflectionEnabled) {
-                        // tsConfigOptions["reflectionEnabled"] = true;
-                        // ts.setReflectionCompilerOptions(tsConfigOptions);
-                        Harness.lightMode = true;
-                    }
-
                 }
                 else {
                     const baseUrl = harnessSettings["baseUrl"];
                     if (baseUrl !== undefined && !ts.isRootedDiskPath(baseUrl)) {
                         harnessSettings["baseUrl"] = ts.getNormalizedAbsolutePath(baseUrl, rootDir);
                     }
+                }
+
+                if (harnessSettings["reflectionEnabled"] || tsConfigOptions && tsConfigOptions.reflectionEnabled) {
+                    Harness.lightMode = true; // TODO: store previous status.
                 }
 
                 lastUnit = units[units.length - 1];

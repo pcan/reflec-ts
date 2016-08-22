@@ -1698,6 +1698,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                     }
                 }
 
+                if (node.$declarationLink) {
+                    emitDeclarationName(node.$declarationLink);
+                    return;
+                }
+
                 if (!node.parent) {
                     write(node.text);
                 }

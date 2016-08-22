@@ -152,13 +152,15 @@ namespace ts.reflection {
         function createRegisterClassCallStatement(declaration: ClassDeclaration, pkg: TypePackage): Statement {
             if (!existsTypeDeclarationDuplicate(declaration, pkg)) {
                 pkg.types[getKeyForNameAndKind(getDeclarationName(declaration), declaration.kind)] = declaration;
+                let classIdentifier = builder.createIdentifier(getDeclarationName(declaration));
+                classIdentifier.$declarationLink = declaration;
                 let callStatement = builder.createExpressionStatement(
                     builder.createCallExpression(
                         builder.createPropertyAccessExpression( //Reflection.registerClass
                             registerClassFunctionName,
                             builder.createIdentifier(reflectionModuleName)
                         ), [
-                            builder.createIdentifier(getDeclarationName(declaration)), //MyClass
+                            classIdentifier, //MyClass
                             getFullyQualifiedTypeName(pkg, getDeclarationName(declaration))
                         ]
                     )

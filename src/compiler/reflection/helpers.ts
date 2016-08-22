@@ -205,7 +205,7 @@ namespace ts.reflection {
     }
 
     export function getDeclarationName(decl : DeclarationStatement) {
-        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & SyntaxKind.DefaultClause ? 'default' : '';
+        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & NodeFlags.Default ? 'default' : '';
     }
 
 }

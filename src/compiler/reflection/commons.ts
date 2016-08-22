@@ -1,6 +1,10 @@
 /* @internal */
 namespace ts {
 
+    export interface Node {
+        $declarationLink?:Declaration;
+    }
+
     export interface Type {
         $info?: reflection.ReflectionInfo;
     }

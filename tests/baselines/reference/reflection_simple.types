@@ -1,5 +1,7 @@
 === c:/root/file1.ts ===
 
+
+
 class Pippo {
 > : (any: any) => void
 > : (fullyQualifiedName: string) => (any: any) => void
