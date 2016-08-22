@@ -912,6 +912,7 @@ namespace ts {
         public text: string;
         public scriptSnapshot: IScriptSnapshot;
         public lineMap: number[];
+        public compilerOptions: CompilerOptions;
 
         public statements: NodeArray<Statement>;
         public endOfFileToken: Node;
@@ -1995,7 +1996,7 @@ namespace ts {
 
             if (this.currentFileName !== fileName) {
                 // This is a new file, just parse it
-                sourceFile = createLanguageServiceSourceFile(fileName, scriptSnapshot, ScriptTarget.Latest, version, /*setNodeParents*/ true, scriptKind);
+                sourceFile = createLanguageServiceSourceFile(fileName, scriptSnapshot, this.host.getCompilationSettings(), version, /*setNodeParents*/ true, scriptKind);
             }
             else if (this.currentFileVersion !== version) {
                 // This is the same file, just a newer version. Incrementally parse the file.
@@ -2112,7 +2113,7 @@ namespace ts {
 
         // if jsx is specified then treat file as .tsx
         const inputFileName = transpileOptions.fileName || (options.jsx ? "module.tsx" : "module.ts");
-        const sourceFile = createSourceFile(inputFileName, input, options.target);
+        const sourceFile = createSourceFile(inputFileName, input, options);
         if (transpileOptions.moduleName) {
             sourceFile.moduleName = transpileOptions.moduleName;
         }
@@ -2175,9 +2176,9 @@ namespace ts {
         return output.outputText;
     }
 
-    export function createLanguageServiceSourceFile(fileName: string, scriptSnapshot: IScriptSnapshot, scriptTarget: ScriptTarget, version: string, setNodeParents: boolean, scriptKind?: ScriptKind): SourceFile {
+    export function createLanguageServiceSourceFile(fileName: string, scriptSnapshot: IScriptSnapshot, compilerOptions: CompilerOptions, version: string, setNodeParents: boolean, scriptKind?: ScriptKind): SourceFile {
         const text = scriptSnapshot.getText(0, scriptSnapshot.getLength());
-        const sourceFile = createSourceFile(fileName, text, scriptTarget, setNodeParents, scriptKind);
+        const sourceFile = createSourceFile(fileName, text, compilerOptions, setNodeParents, scriptKind);
         setSourceFileFields(sourceFile, scriptSnapshot, version);
         return sourceFile;
     }
@@ -2239,7 +2240,7 @@ namespace ts {
         }
 
         // Otherwise, just create a new source file.
-        return createLanguageServiceSourceFile(sourceFile.fileName, scriptSnapshot, sourceFile.languageVersion, version, /*setNodeParents*/ true, sourceFile.scriptKind);
+        return createLanguageServiceSourceFile(sourceFile.fileName, scriptSnapshot, sourceFile.compilerOptions, version, /*setNodeParents*/ true, sourceFile.scriptKind);
     }
 
     export function createDocumentRegistry(useCaseSensitiveFileNames?: boolean, currentDirectory = ""): DocumentRegistry {
@@ -2316,7 +2317,7 @@ namespace ts {
                 Debug.assert(acquiring, "How could we be trying to update a document that the registry doesn't have?");
 
                 // Have never seen this file with these settings.  Create a new source file for it.
-                const sourceFile = createLanguageServiceSourceFile(fileName, scriptSnapshot, compilationSettings.target, version, /*setNodeParents*/ false, scriptKind);
+                const sourceFile = createLanguageServiceSourceFile(fileName, scriptSnapshot, compilationSettings, version, /*setNodeParents*/ false, scriptKind);
 
                 entry = {
                     sourceFile: sourceFile,

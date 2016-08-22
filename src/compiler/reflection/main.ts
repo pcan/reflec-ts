@@ -2,42 +2,25 @@
 /// <reference path="./builder1.ts"/>
 /// <reference path="./builder2.ts"/>
 
-namespace ts {
-    export function setReflectionCompilerOptions(compilerOptions: CompilerOptions){
-        reflection.setConfig(null, compilerOptions);
-    }
-}
-
 /* @internal */
 namespace ts.reflection {
     //TODO: check if Reflection already exists.
 
-    let compilerHost: CompilerHost;
-    let compilerOptions: CompilerOptions;
-
-    export function setConfig(host: CompilerHost, options: CompilerOptions) {
-        compilerHost = host;
-        compilerOptions = options;
-    }
-
-    function initConfiguration() {
-        if(compilerOptions && compilerOptions.reflectionEnabled) {
-            return compilerOptions;
-        }
-
-        const configFileName = compilerOptions && compilerOptions.configFilePath || compilerHost && sys && sys.fileExists && findConfigFile(compilerHost.getCurrentDirectory(), sys.fileExists);
-        if (configFileName) {
-            let config = readConfigFile(configFileName, sys.readFile).config;
-            config.compilerOptions = config.compilerOptions || {};
-            if(config.reflectionEnabled) {
-                config.compilerOptions.reflectionEnabled = true;
+    export function initConfig(compilerHost: CompilerHost, compilerOptions: CompilerOptions) {
+        if (compilerHost && compilerOptions && !compilerOptions.reflectionEnabled) {
+            const configFileName = compilerOptions && compilerOptions.configFilePath || compilerHost && sys && sys.fileExists && findConfigFile(compilerHost.getCurrentDirectory(), sys.fileExists);
+            if (configFileName) {
+                let config = readConfigFile(configFileName, sys.readFile).config;
+                config.compilerOptions = config.compilerOptions || {};
+                if (config.reflectionEnabled) {
+                    compilerOptions.reflectionEnabled = true;
+                }
             }
-            compilerOptions = config.compilerOptions;
         }
     }
 
     export function addReflectionToAST(sourceFile: SourceFile) {
-        initConfiguration();
+        let compilerOptions = sourceFile.compilerOptions;
         if (!isDeclarationFile(sourceFile) && sourceFile.statements.length > 0 && compilerOptions && compilerOptions.reflectionEnabled) {
             const useDecorators = compilerOptions && compilerOptions.experimentalDecorators;
             injectReflectionHooks2(sourceFile, useDecorators);
@@ -50,6 +33,7 @@ namespace ts.reflection {
     }
 
     export function emitReflectionModule(resolver: EmitResolver, host: EmitHost, program: Program, sourceFile: SourceFile) {
+        let compilerOptions = host.getCompilerOptions();
         if (!compilerOptions || !compilerOptions.reflectionEnabled) {
             return;
         }

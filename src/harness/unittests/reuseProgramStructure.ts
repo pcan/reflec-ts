@@ -96,7 +96,7 @@ namespace ts {
     }
 
     function createSourceFileWithText(fileName: string, sourceText: SourceText, target: ScriptTarget) {
-        const file = <SourceFileWithText>createSourceFile(fileName, sourceText.getFullText(), target);
+        const file = <SourceFileWithText>createSourceFile(fileName, sourceText.getFullText(), { target });
         file.sourceText = sourceText;
         return file;
     }

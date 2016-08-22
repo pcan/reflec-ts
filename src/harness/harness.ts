@@ -828,12 +828,12 @@ namespace Harness {
         export function createSourceFileAndAssertInvariants(
             fileName: string,
             sourceText: string,
-            languageVersion: ts.ScriptTarget) {
+            options: ts.CompilerOptions) {
             // We'll only assert invariants outside of light mode.
             const shouldAssertInvariants = !Harness.lightMode;
 
             // Only set the parent nodes if we're asserting invariants.  We don't need them otherwise.
-            const result = ts.createSourceFile(fileName, sourceText, languageVersion, /*setParentNodes:*/ shouldAssertInvariants);
+            const result = ts.createSourceFile(fileName, sourceText, options, /*setParentNodes:*/ shouldAssertInvariants);
 
             if (shouldAssertInvariants) {
                 Utils.assertInvariants(result, /*parent:*/ undefined);
@@ -849,7 +849,7 @@ namespace Harness {
         export const es2015DefaultLibFileName = "lib.es2015.d.ts";
 
         const libFileNameSourceFileMap=  ts.createMap<ts.SourceFile>({
-            [defaultLibFileName]: createSourceFileAndAssertInvariants(defaultLibFileName, IO.readFile(libFolder + "lib.es5.d.ts"), /*languageVersion*/ ts.ScriptTarget.Latest)
+            [defaultLibFileName]: createSourceFileAndAssertInvariants(defaultLibFileName, IO.readFile(libFolder + "lib.es5.d.ts"), /*languageVersion*/ { target: ts.ScriptTarget.Latest })
         });
 
         export function getDefaultLibrarySourceFile(fileName = defaultLibFileName): ts.SourceFile {
@@ -858,7 +858,7 @@ namespace Harness {
             }
 
             if (!libFileNameSourceFileMap[fileName]) {
-                libFileNameSourceFileMap[fileName] = createSourceFileAndAssertInvariants(fileName, IO.readFile(libFolder + fileName), ts.ScriptTarget.Latest);
+                libFileNameSourceFileMap[fileName] = createSourceFileAndAssertInvariants(fileName, IO.readFile(libFolder + fileName), { target: ts.ScriptTarget.Latest });
             }
             return libFileNameSourceFileMap[fileName];
         }
@@ -878,11 +878,10 @@ namespace Harness {
         export function createCompilerHost(
             inputFiles: TestFile[],
             writeFile: (fn: string, contents: string, writeByteOrderMark: boolean) => void,
-            scriptTarget: ts.ScriptTarget,
+            options: ts.CompilerOptions,
             useCaseSensitiveFileNames: boolean,
             // the currentDirectory is needed for rwcRunner to passed in specified current directory to compiler host
-            currentDirectory: string,
-            newLineKind?: ts.NewLineKind): ts.CompilerHost {
+            currentDirectory: string): ts.CompilerHost {
 
             // Local get canonical file name function, that depends on passed in parameter for useCaseSensitiveFileNames
             const getCanonicalFileName = ts.createGetCanonicalFileName(useCaseSensitiveFileNames);
@@ -899,7 +898,7 @@ namespace Harness {
                         realPathMap.set(linkPath, fileName);
                         fileMap.set(path, (): ts.SourceFile => { throw new Error("Symlinks should always be resolved to a realpath first"); });
                     }
-                    const sourceFile = createSourceFileAndAssertInvariants(fileName, file.content, scriptTarget);
+                    const sourceFile = createSourceFileAndAssertInvariants(fileName, file.content, options);
                     fileMap.set(path, () => sourceFile);
                 }
             }
@@ -912,7 +911,7 @@ namespace Harness {
                 }
                 else if (fileName === fourslashFileName) {
                     const tsFn = "tests/cases/fourslash/" + fourslashFileName;
-                    fourslashSourceFile = fourslashSourceFile || createSourceFileAndAssertInvariants(tsFn, Harness.IO.readFile(tsFn), scriptTarget);
+                    fourslashSourceFile = fourslashSourceFile || createSourceFileAndAssertInvariants(tsFn, Harness.IO.readFile(tsFn), options);
                     return fourslashSourceFile;
                 }
                 else {
@@ -922,6 +921,7 @@ namespace Harness {
                 }
             }
 
+            const newLineKind = options.newLine;
             const newLine =
                 newLineKind === ts.NewLineKind.CarriageReturnLineFeed ? carriageReturnLineFeed :
                     newLineKind === ts.NewLineKind.LineFeed ? lineFeed :
@@ -1116,10 +1116,9 @@ namespace Harness {
             const compilerHost = createCompilerHost(
                 programFiles.concat(otherFiles),
                 (fileName, code, writeByteOrderMark) => fileOutputs.push({ fileName, code, writeByteOrderMark }),
-                options.target,
+                options,
                 useCaseSensitiveFileNames,
-                currentDirectory,
-                options.newLine);
+                currentDirectory);
 
             let traceResults: string[];
             if (options.traceResolution) {

@@ -16,6 +16,7 @@ namespace ts {
     export interface SourceFile {
         $typePackage?: reflection.TypePackage;
         $packageNameLiteral?: StringLiteral;
+        compilerOptions: CompilerOptions;
     }
 
     export type StatementsBlock = DefaultClause;

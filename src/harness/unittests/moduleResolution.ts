@@ -287,7 +287,7 @@ namespace ts {
             const host: CompilerHost = {
                 getSourceFile: (fileName: string, languageVersion: ScriptTarget) => {
                     const path = normalizePath(combinePaths(currentDirectory, fileName));
-                    return path in files ? createSourceFile(fileName, files[path], languageVersion) : undefined;
+                    return path in files ? createSourceFile(fileName, files[path], { target: languageVersion }) : undefined;
                 },
                 getDefaultLibFileName: () => "lib.d.ts",
                 writeFile: (fileName, content): void => { throw new Error("NotImplemented"); },
@@ -354,7 +354,7 @@ export = C;
     });
 
     describe("Files with different casing", () => {
-        const library = createSourceFile("lib.d.ts", "", ScriptTarget.ES5);
+        const library = createSourceFile("lib.d.ts", "", { target: ScriptTarget.ES5 });
         function test(files: Map<string>, options: CompilerOptions, currentDirectory: string, useCaseSensitiveFileNames: boolean, rootFiles: string[], diagnosticCodes: number[]): void {
             const getCanonicalFileName = createGetCanonicalFileName(useCaseSensitiveFileNames);
             if (!useCaseSensitiveFileNames) {
@@ -367,7 +367,7 @@ export = C;
                         return library;
                     }
                     const path = getCanonicalFileName(normalizePath(combinePaths(currentDirectory, fileName)));
-                    return path in files ? createSourceFile(fileName, files[path], languageVersion) : undefined;
+                    return path in files ? createSourceFile(fileName, files[path], { target: languageVersion }) : undefined;
                 },
                 getDefaultLibFileName: () => "lib.d.ts",
                 writeFile: (fileName, content): void => { throw new Error("NotImplemented"); },
@@ -1017,7 +1017,7 @@ import b = require("./moduleB");
             const files = [f1, f2, f3, f4];
 
             const names = map(files, f => f.name);
-            const sourceFiles = arrayToMap(map(files, f => createSourceFile(f.name, f.content, ScriptTarget.ES6)), f => f.fileName);
+            const sourceFiles = arrayToMap(map(files, f => createSourceFile(f.name, f.content, { target: ScriptTarget.ES6 })), f => f.fileName);
             const compilerHost: CompilerHost = {
                 fileExists : fileName => fileName in sourceFiles,
                 getSourceFile: fileName => sourceFiles[fileName],

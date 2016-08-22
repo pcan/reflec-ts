@@ -20,7 +20,7 @@ namespace ts {
     }
 
     function createTree(text: IScriptSnapshot, version: string) {
-        return createLanguageServiceSourceFile(/*fileName:*/ "", text, ScriptTarget.Latest, version, /*setNodeParents:*/ true);
+        return createLanguageServiceSourceFile(/*fileName:*/ "", text, { target: ScriptTarget.Latest }, version, /*setNodeParents:*/ true);
     }
 
     function assertSameDiagnostics(file1: SourceFile, file2: SourceFile) {
@@ -44,8 +44,8 @@ namespace ts {
 
     // NOTE: 'reusedElements' is the expected count of elements reused from the old tree to the new
     // tree.  It may change as we tweak the parser.  If the count increases then that should always
-    // be a good thing.  If it decreases, that's not great (less reusability), but that may be 
-    // unavoidable.  If it does decrease an investigation should be done to make sure that things 
+    // be a good thing.  If it decreases, that's not great (less reusability), but that may be
+    // unavoidable.  If it does decrease an investigation should be done to make sure that things
     // are still ok and we're still appropriately reusing most of the tree.
     function compareTrees(oldText: IScriptSnapshot, newText: IScriptSnapshot, textChangeRange: TextChangeRange, expectedReusedElements: number, oldTree?: SourceFile): SourceFile {
         oldTree = oldTree || createTree(oldText, /*version:*/ ".");
@@ -639,7 +639,7 @@ module m3 { }\
         });
 
         it("Unterminated comment after keyword converted to identifier", () => {
-            // 'public' as a keyword should be incrementally unusable (because it has an 
+            // 'public' as a keyword should be incrementally unusable (because it has an
             // unterminated comment).  When we convert it to an identifier, that shouldn't
             // change anything, and we should still get the same errors.
             const source = "return; a.public /*";

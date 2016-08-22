@@ -867,7 +867,7 @@ namespace ts {
                 text = "";
             }
 
-            return text !== undefined ? createSourceFile(fileName, text, languageVersion, setParentNodes) : undefined;
+            return text !== undefined ? createSourceFile(fileName, text, options, setParentNodes) : undefined;
         }
 
         function directoryExists(directoryPath: string): boolean {
@@ -1084,7 +1084,7 @@ namespace ts {
     }
 
     export function createProgram(rootNames: string[], options: CompilerOptions, host?: CompilerHost, oldProgram?: Program): Program {
-        reflection.setConfig(host, options);
+        reflection.initConfig(host, options);
         let program: Program;
         let files: SourceFile[] = [];
         let commonSourceDirectory: string;
