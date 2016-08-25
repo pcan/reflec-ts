@@ -8,17 +8,21 @@ A enhanced (unofficial) version of the [TypeScript compiler](https://github.com/
 Releases follow the official ones, so I try to keep the same scheme. For the latest stable version:
 
 
-```
+```shell
 npm install -g reflec-ts
 ```
 
 For the latest available version:
 
-```
+```shell
 npm install -g reflec-ts@next
 ```
 
 I try to keep reflec-ts master aligned with the official one, at least weekly.
+
+### Examples
+
+You can find some examples [here](https://github.com/pcan/reflec-ts-examples).
 
 ## How it works
 
