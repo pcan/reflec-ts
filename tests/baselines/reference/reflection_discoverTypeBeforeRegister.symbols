@@ -1,0 +1,18 @@
+=== c:/root/file1.ts ===
+class Outer {
+>Outer : Symbol(Outer, Decl(file1.ts, 0, 0))
+
+    // In this test case the type discovery process will detect 'Student' class before it is processed by the package scanner registration.
+    // The bug was related to a duplicate type.$info creation, first on the discovered type object, then on the scanned one.
+    a: Array<Inner>;
+>a : Symbol(Outer.a, Decl(file1.ts, 0, 13))
+>Array : Symbol(Array, Decl(lib.d.ts, --, --), Decl(lib.d.ts, --, --))
+>Inner : Symbol(Inner, Decl(file1.ts, 4, 1))
+}
+
+class Inner {
+>Inner : Symbol(Inner, Decl(file1.ts, 4, 1))
+
+    id: number;
+>id : Symbol(Inner.id, Decl(file1.ts, 6, 13))
+}

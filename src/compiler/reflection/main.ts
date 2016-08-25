@@ -123,44 +123,22 @@ namespace ts.reflection {
 
         function emitReflectionForSourceFile(sourceFile: SourceFile) {
             writer.writeObjectPropertyStart(sourceFile.$packageNameLiteral.text);
-            //emitTypePackage(sourceFile.$typePackage);
             writeFlatTypePackage(sourceFile.$typePackage);
             writer.writeObjectEnd().write(',').writeLine();
         }
-
-        function emitTypePackage(typePackage: TypePackage) {
-            if (typePackage.name) { //do not start new object for root
-                writer.writeObjectPropertyStart(typePackage.name);
-            }
-            let typeDeclaration: TypeDeclaration;
-            for (let typeName in typePackage.types) {
-                typeDeclaration = typePackage.types[typeName];
-                var type = checker.getTypeAtLocation(typeDeclaration);
-                addReflectionInfo(type, typeCounter, typeDeclaration);
-                writer.write(`${type.$info.name}: _l[${type.$info.localIndex}],`).writeLine();
-                let derivedTypes = writeType(type, checker, typeCounter, typeWriter);
-                writeDerivedTypes(derivedTypes, checker, typeCounter, derivedTypeWriter);
-            }
-            for (let childPackageName in typePackage.children) {
-                emitTypePackage(typePackage.children[childPackageName]);
-                writer.write(',').writeLine();
-            }
-            if (typePackage.name) { //do not end object for root
-                writer.writeObjectEnd();
-            }
-        }
-
 
         function writeFlatTypePackage(typePackage: TypePackage) {
             const rootName = (typePackage.fullName ? typePackage.fullName + '.' : '');
             let typeDeclaration: TypeDeclaration;
             for (let typeName in typePackage.types) {
                 typeDeclaration = typePackage.types[typeName];
-                var type = checker.getTypeAtLocation(typeDeclaration);
-                addReflectionInfo(type, typeCounter, typeDeclaration);
+                let type = checker.getTypeAtLocation(typeDeclaration);
+                if (!type.$info) { // only if this type has not been already discovered.
+                    addReflectionInfo(type, typeCounter, typeDeclaration);
+                    let derivedTypes = writeType(type, checker, typeCounter, typeWriter);
+                    writeDerivedTypes(derivedTypes, checker, typeCounter, derivedTypeWriter);
+                }
                 writer.write(`'${rootName + type.$info.name}': _l[${type.$info.localIndex}],`).writeLine();
-                let derivedTypes = writeType(type, checker, typeCounter, typeWriter);
-                writeDerivedTypes(derivedTypes, checker, typeCounter, derivedTypeWriter);
             }
             for (let childPackageName in typePackage.children) {
                 writeFlatTypePackage(typePackage.children[childPackageName]);
