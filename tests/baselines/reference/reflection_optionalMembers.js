@@ -1,13 +1,13 @@
 //// [file1.ts]
 
 
-interface MyInterface {}
-
-export default class implements MyInterface {
-	a: string;
-    method() {
-        this.constructor.getClass().name;
-    }
+interface MyInterface {
+    a:string,
+    b?:number,
+    c?:MyInterface;
+    d:MyInterface;
+    e?();
+    f();
 }
 
 
@@ -32,7 +32,7 @@ export default class implements MyInterface {
     
     var _t, _l = [];
 
-    for(var _cnt = 0; _cnt < 2; _cnt++ ) { _l[_cnt] = O_o(); }
+    for(var _cnt = 0; _cnt < 1; _cnt++ ) { _l[_cnt] = O_o(); }
     var _type_any = {kind: 'any'};
     var _type_string = {kind: 'string'};
     var _type_number = {kind: 'number'};
@@ -46,36 +46,60 @@ export default class implements MyInterface {
     Reflection.$libs['default'] = {
         'file1' : {
             'MyInterface': _l[0],
-            'default': _l[1],
         },
     };
     _t = _l[0];
     _t.kind = 'interface';
     _t.name = 'MyInterface';
-    _t = _l[1];
-    _t.kind = 'class';
-    _t.name = 'default';
     _t.members = [
         {
             name: 'a',
             type: _type_string,
         },
         {
-            name: 'method',
+            name: 'b',
+            type: _type_number,
+            optional: true,
+        },
+        {
+            name: 'c',
+            type: _l[0],
+            optional: true,
+        },
+        {
+            name: 'd',
+            type: _l[0],
+        },
+        {
+            name: 'e',
             type: {
                 kind: 'function',
-                name: 'method', 
+                name: 'e', 
                 signatures: [
                     {
                         length: 0,
                         parameters: [],
-                        returns: _type_void, 
+                        returns: _type_any, 
+                    },
+                ]
+            },
+            optional: true,
+        },
+        {
+            name: 'f',
+            type: {
+                kind: 'function',
+                name: 'f', 
+                signatures: [
+                    {
+                        length: 0,
+                        parameters: [],
+                        returns: _type_any, 
                     },
                 ]
             },
         },
     ];
-    _t.implements = [_l[0], ];
 
     Reflection.registerPackage = function(name) {
         //console.log('Registering package: ' + name);
@@ -141,16 +165,3 @@ require('./Reflection');
 var MyInterface = Reflection.interfaceForName('file1'
     +
         '#MyInterface');
-var default_1 = (function () {
-    function default_1() {
-    }
-    default_1.prototype.method = function () {
-        this.constructor.getClass().name;
-    };
-    return default_1;
-}());
-exports.__esModule = true;
-exports["default"] = default_1;
-Reflection.registerClass(default_1, 'file1'
-    +
-        '#default');

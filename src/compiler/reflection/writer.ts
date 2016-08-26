@@ -94,23 +94,11 @@ namespace ts.reflection {
          */
         function writeMembers() {
             let filteredMembers = members.filter(symbol =>
-                symbol.flags === SymbolFlags.Property || symbol.flags === SymbolFlags.Method);
+                (symbol.flags & SymbolFlags.Property) || (symbol.flags & SymbolFlags.Method));
             if (filteredMembers.length > 0) {
                 writeTypeProperty('members').write(' = ').writeArrayStart();
                 for (let symbol of filteredMembers) {
-                    writer.writeObjectStart()
-                        .write(`name: '${symbol.name}',`).writeLine()
-                        .write('type: ')
-                    //writer.write(symbol.name + ': ');
-                    switch (symbol.flags) {
-                        case SymbolFlags.Property:
-                            writeTypeReferenceForNode(symbol.valueDeclaration);
-                            break;
-                        case SymbolFlags.Method:
-                            writeMethodMember(symbol);
-                            break;
-                    }
-                    writer.writeObjectEnd().write(`,`).writeLine();
+                    writeMemberSymbol(symbol);
                 }
                 writer.writeArrayEnd().write(';').writeLine();
             }
@@ -127,25 +115,28 @@ namespace ts.reflection {
                     writeTypeProperty('statics').write(' = ').writeArrayStart();
                     for (let member of statics) {
                         let symbol = checker.getSymbolAtLocation(member.name);
-                        writer.writeObjectStart()
-                            .write(`name: '${symbol.name}',`).writeLine()
-                            .write('type: ')
-                        //writer.write(symbol.name + ': ');
-                        switch (symbol.flags) {
-                            case SymbolFlags.Property:
-                                writeTypeReferenceForNode(symbol.valueDeclaration);
-                                break;
-                            case SymbolFlags.Method:
-                                writeMethodMember(symbol);
-                                break;
-                        }
-                        writer.writeObjectEnd().write(`,`).writeLine();
+                        writeMemberSymbol(symbol);
                     }
                     writer.writeArrayEnd().write(';').writeLine();
                 }
             }
         }
 
+        function writeMemberSymbol(symbol: Symbol) {
+            writer.writeObjectStart()
+                .write(`name: '${symbol.name}',`).writeLine()
+                .write('type: ')
+            if (symbol.flags & SymbolFlags.Property) {
+                writeTypeReferenceForNode(symbol.valueDeclaration).write(',').writeLine();
+            } else if (symbol.flags & SymbolFlags.Method) {
+                writeMethodMember(symbol).write(',').writeLine();
+            }
+            if(symbol.flags & SymbolFlags.Optional) {
+                writer.write('optional: true,').writeLine();
+            }
+            writer.writeObjectEnd().write(`,`).writeLine();
+        }
+        
         /**
          * Writes constructors.
          */
@@ -167,7 +158,7 @@ namespace ts.reflection {
          */
         function writeCallSignatures() {
             let filteredMembers = members.filter(symbol =>
-                symbol.flags === SymbolFlags.Signature &&
+                (symbol.flags & SymbolFlags.Signature) &&
                 (symbol.declarations[0].kind === SyntaxKind.CallSignature ||
                     symbol.declarations[0].kind === SyntaxKind.FunctionType));
             if (filteredMembers.length > 0) {
@@ -182,7 +173,7 @@ namespace ts.reflection {
          */
         function writeIndexSignatures() {
             let filteredMembers = members.filter(symbol =>
-                symbol.flags === SymbolFlags.Signature &&
+                (symbol.flags & SymbolFlags.Signature) &&
                 symbol.declarations[0].kind === SyntaxKind.IndexSignature);
             if (filteredMembers.length > 0) {
                 writeTypeProperty('index').write(' = ').writeArrayStart();
@@ -195,7 +186,7 @@ namespace ts.reflection {
          * Writes references to type parameters.
          */
         function writeTypeParameters() {
-            let filteredMembers = members.filter(symbol => symbol.flags === SymbolFlags.TypeParameter);
+            let filteredMembers = members.filter(symbol => symbol.flags & SymbolFlags.TypeParameter);
             if (filteredMembers.length > 0) {
                 writeTypeProperty('typeParameters').write(' = ').writeArrayStart(true);
                 for (let symbol of filteredMembers) {
@@ -238,7 +229,7 @@ namespace ts.reflection {
                 .write(`name: '${symbol.name}', `).writeLine()
                 .write(`signatures: `).writeArrayStart();
             writeSignatures([symbol]);
-            writer.writeArrayEnd().writeObjectEnd();
+            return writer.writeArrayEnd().writeObjectEnd();
         }
 
         /**
@@ -395,8 +386,8 @@ namespace ts.reflection {
             }
         }
 
-        function writeAnonymousType() {
-            switch (type.symbol.flags) {
+        function writeAnonymousType() { 
+            switch (type.symbol.flags) { //TODO: filter with bitmask
                 case ts.SymbolFlags.ObjectLiteral:
                     debug.warn('Detected object literal type. Not supported yet.');
                     //todo;

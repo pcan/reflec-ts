@@ -1,0 +1,33 @@
+=== c:/root/file1.ts ===
+
+
+interface MyInterface {
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+>MyInterface : MyInterface
+
+    a:string,
+>a : string
+
+    b?:number,
+>b : number
+
+    c?:MyInterface;
+>c : MyInterface
+>MyInterface : MyInterface
+
+    d:MyInterface;
+>d : MyInterface
+>MyInterface : MyInterface
+
+    e?();
+>e : () => any
+
+    f();
+>f : () => any
+}
+
+
+
+

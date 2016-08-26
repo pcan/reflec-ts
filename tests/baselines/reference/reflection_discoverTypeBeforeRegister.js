@@ -53,7 +53,7 @@ class Inner {
     _t.members = [
         {
             name: 'id',
-            type: _type_number
+            type: _type_number,
         },
     ];
     _t = _l[0];
@@ -62,7 +62,7 @@ class Inner {
     _t.members = [
         {
             name: 'a',
-            type: _l[1]
+            type: _l[1],
         },
     ];
 
