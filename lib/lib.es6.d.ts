@@ -20952,6 +20952,10 @@ interface ParameterInfo {
  */
 interface Member extends ParameterInfo {
 
+    /**
+     * true if this member is not mandatory.
+     */
+    optional?: boolean;
 }
 
 /**
