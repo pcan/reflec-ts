@@ -2,8 +2,6 @@
 
 A enhanced (unofficial) version of the [TypeScript compiler](https://github.com/Microsoft/TypeScript) that provides Reflection capabilities.
 
-**Warning:** I'm improving the runtime API: some details will change until the first stable version. Keep your npm registry updated and feel free to submit issues/suggestions.
-
 ## Installing
 Releases follow the official ones, so I try to keep the same scheme. For the latest stable version:
 
@@ -20,7 +18,7 @@ npm install -g reflec-ts@next
 
 I try to keep reflec-ts master aligned with the official one, at least weekly.
 
-### Examples
+## Examples
 
 You can find some examples [here](https://github.com/pcan/reflec-ts-examples).
 
@@ -145,10 +143,9 @@ There are a few limitations, some of them are by design, others may be overcome 
 ## Roadmap
 
 I'm defining the roadmap right now, the project will evolve to support full reflection capabilities and modularity. At the moment, there are some things that have to be completed soon:
-- Integration with the official test infrastructure: we want to create another `RunnerBase` subclass in order to write reflection tests.
 - Support for class expressions.
 - Support for other types (Union, Intersection, Literals, Tuples and so on)
-- Sample projects
+- Sample projects (currently in progress)
 
 ## Disclaimer
 
