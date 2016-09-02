@@ -2,7 +2,7 @@
 namespace ts {
 
     export interface Node {
-        $declarationLink?:Declaration;
+        $declarationLink?: Declaration;
     }
 
     export interface Type {
@@ -48,7 +48,7 @@ namespace ts.reflection {
 
     export interface TypePackage {
         name: string;
-        fullName:string;
+        fullName: string;
         node: Node;
         parent: TypePackage;
         types?: {
@@ -98,10 +98,10 @@ namespace ts.reflection {
     IntrinsicTypes[TypeFlags.Null] = buildIntrinsicType('null');
     IntrinsicTypes[TypeFlags.Never] = buildIntrinsicType('never');
 
-	export function getIntrinsicType(typeFlags: TypeFlags) {
-		let filtered = typeFlags & 0x3FFF; //from Any to Never (bit 13)
-		return IntrinsicTypes[filtered];
-	}
+    export function getIntrinsicType(typeFlags: TypeFlags) {
+        let filtered = typeFlags & 0x3FFF; //from Any to Never (bit 13)
+        return IntrinsicTypes[filtered];
+    }
 
     export const SerializedTypeKind = { //:{[index: string]: string } ????
         Interface: 'interface',

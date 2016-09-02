@@ -118,7 +118,7 @@ namespace ts.reflection {
 
 
         /**
-         * adds the @$reflection.RegisterClass() decorator
+         * adds the @Reflection.RegisterClass() decorator
          */
         function addRegisterClassDecorator(declaration: ClassDeclaration, pkg: TypePackage) {
             if (!existsTypeDeclarationDuplicate(declaration, pkg)) {

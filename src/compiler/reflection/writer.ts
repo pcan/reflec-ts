@@ -136,7 +136,7 @@ namespace ts.reflection {
             }
             writer.writeObjectEnd().write(`,`).writeLine();
         }
-        
+
         /**
          * Writes constructors.
          */
@@ -386,7 +386,7 @@ namespace ts.reflection {
             }
         }
 
-        function writeAnonymousType() { 
+        function writeAnonymousType() {
             switch (type.symbol.flags) { //TODO: filter with bitmask
                 case ts.SymbolFlags.ObjectLiteral:
                     debug.warn('Detected object literal type. Not supported yet.');

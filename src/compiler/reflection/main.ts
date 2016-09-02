@@ -1,5 +1,5 @@
 /// <reference path="./writer.ts"/>
-/// <reference path="./builder2.ts"/>
+/// <reference path="./builder.ts"/>
 
 
 /* @internal */
