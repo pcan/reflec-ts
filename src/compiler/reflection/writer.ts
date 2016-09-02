@@ -10,9 +10,9 @@ namespace ts.reflection {
     export function writeType(type: Type, checker: TypeChecker, typeCounter: Counter, writer: Writer): Type[] {
         writer.write(`${tempTypeVar} = ${localTypeVar}[${type.$info.localIndex}];`).writeLine();
         const discoveredTypes: Type[] = [];
-        const members = valuesOf(type.symbol.members);
+        const members = type.symbol ? valuesOf(type.symbol.members) : [];
 
-        switch (type.flags) {
+        switch (type.flags & allTypeFlagsMask) {
             case TypeFlags.StringLiteral:
                 debug.warn('Detected string literal type. Not supported yet.');
                 break;
@@ -48,7 +48,6 @@ namespace ts.reflection {
             default:
                 let name = type.symbol ? type.symbol.name : 'unknown';
                 debug.warn('exploreType found an unknown type:', name, 'with typeFlags:', type.flags);
-            //getIntrinsicType(TypeFlags.Any);
         }
 
         return discoveredTypes;
@@ -127,11 +126,11 @@ namespace ts.reflection {
                 .write(`name: '${symbol.name}',`).writeLine()
                 .write('type: ')
             if (symbol.flags & SymbolFlags.Property) {
-                writeTypeReferenceForNode(symbol.valueDeclaration).write(',').writeLine();
+                writeReferenceToTypeForNode(symbol.valueDeclaration).write(',').writeLine();
             } else if (symbol.flags & SymbolFlags.Method) {
                 writeMethodMember(symbol).write(',').writeLine();
             }
-            if(symbol.flags & SymbolFlags.Optional) {
+            if (symbol.flags & SymbolFlags.Optional) {
                 writer.write('optional: true,').writeLine();
             }
             writer.writeObjectEnd().write(`,`).writeLine();
@@ -190,7 +189,7 @@ namespace ts.reflection {
             if (filteredMembers.length > 0) {
                 writeTypeProperty('typeParameters').write(' = ').writeArrayStart(true);
                 for (let symbol of filteredMembers) {
-                    writeTypeReferenceForNode(symbol.declarations[0]).write(`, `);
+                    writeReferenceToTypeForNode(symbol.declarations[0]).write(`, `);
                 }
                 writer.writeArrayEnd(true).write(';').writeLine();
             }
@@ -207,7 +206,7 @@ namespace ts.reflection {
                 let declaration = <TypeParameterDeclaration>typeParam.symbol.declarations[0];
                 if (declaration.constraint) {
                     writeTypeProperty('constraint').write(` = `);
-                    writeTypeReferenceForNode(declaration.constraint).write(';').writeLine();
+                    writeReferenceToTypeForNode(declaration.constraint).write(';').writeLine();
                 }
             }
         }
@@ -216,8 +215,8 @@ namespace ts.reflection {
         /**
          * Writes a reference to the variable that holds metadata for the type of the given node.
          */
-        function writeTypeReferenceForNode(node: Node) {
-            return writeReferenceForType(checker.getTypeAtLocation(node));
+        function writeReferenceToTypeForNode(node: Node) {
+            return writeReferenceToType(checker.getTypeAtLocation(node));
         }
 
         /**
@@ -262,7 +261,7 @@ namespace ts.reflection {
             for (let parameter of declaration.parameters) {
                 writer.writeObjectStart(true)
                     .write(`name: '${(<Identifier>parameter.name).text}', type: `) //TODO: check this! name can be Identifier or BindingPattern (what is BindingPattern?)
-                writeTypeReferenceForNode(parameter)
+                writeReferenceToTypeForNode(parameter)
                     .writeObjectEnd(true).write(',').writeLine();
             }
             writer.writeArrayEnd(!declaration.parameters.length).write(',').writeLine();
@@ -270,13 +269,13 @@ namespace ts.reflection {
             if (signature.typeParameters && signature.typeParameters.length > 0) {
                 writer.write(`typeParameters: `).writeArrayStart(true);
                 for (let parameter of signature.typeParameters) {
-                    writeReferenceForType(parameter).write(', ');
+                    writeReferenceToType(parameter).write(', ');
                 }
                 writer.writeArrayEnd(true).write(',').writeLine();
             }
             if (returnType) {
                 writer.write(`returns: `);
-                writeReferenceForType(returnType).write(', ').writeLine();
+                writeReferenceToType(returnType).write(', ').writeLine();
             }
             if (hasRestParam) {
                 writer.write(`rest: true`).writeLine();
@@ -291,7 +290,7 @@ namespace ts.reflection {
             let baseClass = getClassExtendsHeritageClause();
             if (baseClass) {
                 writeTypeProperty('extends').write(` = `);
-                writeTypeReferenceForNode(baseClass).write(';').writeLine();
+                writeReferenceToTypeForNode(baseClass).write(';').writeLine();
             }
         }
 
@@ -303,7 +302,7 @@ namespace ts.reflection {
             if (heritageClausesTypes && heritageClausesTypes.length > 0) {
                 writeTypeProperty(propertyName).write(` = [`);
                 for (let clause of heritageClausesTypes) {
-                    writeReferenceForType(clause).write(', ');
+                    writeReferenceToType(clause).write(', ');
                 }
                 writer.write(`];`).writeLine();
             }
@@ -371,15 +370,15 @@ namespace ts.reflection {
             if (isArrayType(type)) { //why this distinction? array should be nothing special... TBD
                 writeTypeKind(SerializedTypeKind.Array);
                 writeTypeProperty('elementType').write(' = ');
-                writeReferenceForType(ref.typeArguments[0]).write(';').writeLine();
+                writeReferenceToType(ref.typeArguments[0]).write(';').writeLine();
             } else {
                 writeTypeKind(SerializedTypeKind.Reference);
                 writeTypeProperty('type').write(' = ');
-                writeReferenceForType(ref.target).write(';').writeLine();
+                writeReferenceToType(ref.target).write(';').writeLine();
                 if (ref.typeArguments) {
                     writer.write(`typeParameters: `).writeArrayStart(true);
                     for (let argument of ref.typeArguments) {
-                        writeReferenceForType(argument).write(', ');
+                        writeReferenceToType(argument).write(', ');
                     }
                     writer.writeArrayEnd(true).write(',').writeLine();
                 }
@@ -414,7 +413,7 @@ namespace ts.reflection {
         }
 
 
-        function writeReferenceForType(type: Type): Writer {
+        function writeReferenceToType(type: Type): Writer {
             let intrinsicType = getIntrinsicType(type.flags);
             if (intrinsicType) {
                 return writer.write(intrinsicType.varName);

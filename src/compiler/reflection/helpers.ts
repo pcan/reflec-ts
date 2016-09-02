@@ -136,8 +136,8 @@ namespace ts.reflection {
             }
             this.sourceFile.text += (this.buffer + '\n');
             this.sourceFile.endOfFileToken = this.sourceFile.endOfFileToken || this.createNode<Node>(SyntaxKind.EndOfFileToken);
-            this.sourceFile.endOfFileToken.pos=this.sourceFile.text.length;
-            this.sourceFile.endOfFileToken.end=this.sourceFile.text.length;
+            this.sourceFile.endOfFileToken.pos = this.sourceFile.text.length;
+            this.sourceFile.endOfFileToken.end = this.sourceFile.text.length;
             this.buffer = '\n//';
         }
 
@@ -204,7 +204,7 @@ namespace ts.reflection {
         return !!pkg.types[getKeyForNameAndKind(getDeclarationName(statement), statement.kind)];
     }
 
-    export function getDeclarationName(decl : DeclarationStatement) {
+    export function getDeclarationName(decl: DeclarationStatement) {
         return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & NodeFlags.Default ? 'default' : '';
     }
 

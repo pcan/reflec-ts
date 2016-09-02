@@ -62,7 +62,7 @@ namespace ts.reflection {
     export interface ReflectionInfo {
         localIndex?: number;
         path?: string;
-        name?: string;
+        name?: string; // may be null. See anonymous types, for example.
     }
 
     let invalidIdentifierCharsRegex = /^[\d]|[^a-zA-Z\d\_\$\xA0-\uFFFF]+?/;
@@ -98,8 +98,19 @@ namespace ts.reflection {
     IntrinsicTypes[TypeFlags.Null] = buildIntrinsicType('null');
     IntrinsicTypes[TypeFlags.Never] = buildIntrinsicType('never');
 
+    export const intrinsicTypeFlagsMask = TypeFlags.Any | TypeFlags.String |
+        TypeFlags.Number | TypeFlags.Boolean | TypeFlags.Enum | TypeFlags.StringLiteral |
+        TypeFlags.NumberLiteral | TypeFlags.BooleanLiteral | TypeFlags.EnumLiteral | TypeFlags.ESSymbol |
+        TypeFlags.Void | TypeFlags.Undefined | TypeFlags.Null | TypeFlags.Never;
+
+    export const allTypeFlagsMask = intrinsicTypeFlagsMask | TypeFlags.TypeParameter
+        | TypeFlags.Class | TypeFlags.Interface
+        | TypeFlags.Reference | TypeFlags.Tuple | TypeFlags.Union
+        | TypeFlags.Intersection | TypeFlags.Anonymous;
+
+
     export function getIntrinsicType(typeFlags: TypeFlags) {
-        let filtered = typeFlags & 0x3FFF; //from Any to Never (bit 13)
+        let filtered = typeFlags & intrinsicTypeFlagsMask; //from Any to Never (bit 13)
         return IntrinsicTypes[filtered];
     }
 
@@ -123,7 +134,7 @@ namespace ts.reflection {
             name = getDeclarationName(declaration);
             name = name ? name : type.symbol.name;
         } else {
-            name = type.symbol.name;
+            name = type.symbol ? type.symbol.name : null; // for anonymous types name is null.
         }
         return name;
     }
