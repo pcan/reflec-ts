@@ -319,7 +319,7 @@ namespace ts.reflection {
                 //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
                 pkg.registerClass(ctor, metadata);
                 return ctor;
-            }
+            };
         };
         return pkg;
     };
@@ -341,7 +341,7 @@ namespace ts.reflection {
             //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
             Reflection.registerClass(ctor, name);
             return ctor;
-        }
+        };
     };
 
     Reflection.classForName = function(pkg, name) {
@@ -359,7 +359,7 @@ namespace ts.reflection {
         return Reflection.classForConstructor(this);
     };
 
-    globalObj.${reflectionModuleName} = ${reflectionModuleName}
+    globalObj.${reflectionModuleName} = ${reflectionModuleName};
     \n}(this));\n\n`;
 
 }

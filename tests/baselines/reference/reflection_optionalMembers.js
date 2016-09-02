@@ -115,7 +115,7 @@ interface MyInterface {
                 //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
                 pkg.registerClass(ctor, metadata);
                 return ctor;
-            }
+            };
         };
         return pkg;
     };
@@ -137,7 +137,7 @@ interface MyInterface {
             //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
             Reflection.registerClass(ctor, name);
             return ctor;
-        }
+        };
     };
 
     Reflection.classForName = function(pkg, name) {
@@ -155,7 +155,7 @@ interface MyInterface {
         return Reflection.classForConstructor(this);
     };
 
-    globalObj.Reflection = Reflection
+    globalObj.Reflection = Reflection;
     
 }(this));
 

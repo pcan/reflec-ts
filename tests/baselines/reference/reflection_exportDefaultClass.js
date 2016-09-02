@@ -91,7 +91,7 @@ export default class implements MyInterface {
                 //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
                 pkg.registerClass(ctor, metadata);
                 return ctor;
-            }
+            };
         };
         return pkg;
     };
@@ -113,7 +113,7 @@ export default class implements MyInterface {
             //console.log('Invoking RegisterClass decorator for: ' + ctor.name);
             Reflection.registerClass(ctor, name);
             return ctor;
-        }
+        };
     };
 
     Reflection.classForName = function(pkg, name) {
@@ -131,7 +131,7 @@ export default class implements MyInterface {
         return Reflection.classForConstructor(this);
     };
 
-    globalObj.Reflection = Reflection
+    globalObj.Reflection = Reflection;
     
 }(this));
 
