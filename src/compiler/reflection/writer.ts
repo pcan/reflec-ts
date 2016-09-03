@@ -392,8 +392,7 @@ namespace ts.reflection {
                     //todo;
                     break;
                 case ts.SymbolFlags.Class:
-                    debug.warn('Detected class expression. Not supported yet.');
-                    //todo;
+                    writeClassExpression();
                     break;
                 case ts.SymbolFlags.TypeLiteral:
                     writeTypeLiteral();
@@ -412,6 +411,12 @@ namespace ts.reflection {
             writeIndexSignatures();
         }
 
+        function writeClassExpression() {
+            writeTypeKind(SerializedTypeKind.ClassExpression);
+            writeTypeProperty('type').write(' = ');
+            let targetType = checker.getDeclaredTypeOfSymbol(type.symbol);
+            writeReferenceToType(targetType).write(';').writeLine();
+        }
 
         function writeReferenceToType(type: Type): Writer {
             let intrinsicType = getIntrinsicType(type.flags);

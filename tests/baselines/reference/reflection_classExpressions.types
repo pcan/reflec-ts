@@ -1,0 +1,62 @@
+=== c:/root/file1.ts ===
+
+
+class MyClass {
+>MyClass : MyClass
+> : void
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : string
+
+	named = class NamedClassExpr {
+>named : typeof NamedClassExpr
+>class NamedClassExpr {        id: number;    } : typeof NamedClassExpr
+>NamedClassExpr : typeof NamedClassExpr
+
+        id: number;
+>id : number
+
+    };
+    anonymous = class {
+>anonymous : typeof (Anonymous class)
+>class {        id: number;    } : typeof (Anonymous class)
+
+        id: number;
+>id : number
+
+    };
+    nested = class A {
+>nested : typeof A
+>class A {        id: number;        nested = class B {            id: number;            nested = class C {                id: number;                recursive: A;            };        };    } : typeof A
+>A : typeof A
+
+        id: number;
+>id : number
+
+        nested = class B {
+>nested : typeof B
+>class B {            id: number;            nested = class C {                id: number;                recursive: A;            };        } : typeof B
+>B : typeof B
+
+            id: number;
+>id : number
+
+            nested = class C {
+>nested : typeof C
+>class C {                id: number;                recursive: A;            } : typeof C
+>C : typeof C
+
+                id: number;
+>id : number
+
+                recursive: A;
+>recursive : A
+>A : A
+
+            };
+        };
+    };
+}
+
+
+
+

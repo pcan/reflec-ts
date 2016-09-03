@@ -122,6 +122,7 @@ namespace ts.reflection {
         Parameter: 'parameter',
         Reference: 'reference',
         Alias: 'alias',
+        ClassExpression: 'expression',
     };
 
     export function getTypeName(type: Type, statement?: Statement | Declaration): string {

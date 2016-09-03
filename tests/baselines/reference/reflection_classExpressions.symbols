@@ -1,0 +1,54 @@
+=== c:/root/file1.ts ===
+
+
+class MyClass {
+>MyClass : Symbol(MyClass, Decl(file1.ts, 0, 0))
+
+	named = class NamedClassExpr {
+>named : Symbol(MyClass.named, Decl(file1.ts, 2, 15))
+>NamedClassExpr : Symbol(NamedClassExpr, Decl(file1.ts, 3, 8))
+
+        id: number;
+>id : Symbol(NamedClassExpr.id, Decl(file1.ts, 3, 31))
+
+    };
+    anonymous = class {
+>anonymous : Symbol(MyClass.anonymous, Decl(file1.ts, 5, 6))
+
+        id: number;
+>id : Symbol((Anonymous class).id, Decl(file1.ts, 6, 23))
+
+    };
+    nested = class A {
+>nested : Symbol(MyClass.nested, Decl(file1.ts, 8, 6))
+>A : Symbol(A, Decl(file1.ts, 9, 12))
+
+        id: number;
+>id : Symbol(A.id, Decl(file1.ts, 9, 22))
+
+        nested = class B {
+>nested : Symbol(A.nested, Decl(file1.ts, 10, 19))
+>B : Symbol(B, Decl(file1.ts, 11, 16))
+
+            id: number;
+>id : Symbol(B.id, Decl(file1.ts, 11, 26))
+
+            nested = class C {
+>nested : Symbol(B.nested, Decl(file1.ts, 12, 23))
+>C : Symbol(C, Decl(file1.ts, 13, 20))
+
+                id: number;
+>id : Symbol(C.id, Decl(file1.ts, 13, 30))
+
+                recursive: A;
+>recursive : Symbol(C.recursive, Decl(file1.ts, 14, 27))
+>A : Symbol(A, Decl(file1.ts, 9, 12))
+
+            };
+        };
+    };
+}
+
+
+
+
