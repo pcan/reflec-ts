@@ -143,7 +143,7 @@ There are a few limitations, some of them are by design, others may be overcome 
 ## Roadmap
 
 I'm defining the roadmap right now, the project will evolve to support full reflection capabilities and modularity. At the moment, there are some things that have to be completed soon:
-- Support for class expressions.
+- ~~Support for class expressions.~~ done in v0.3.6
 - Support for other types (Union, Intersection, Literals, Tuples and so on)
 - Sample projects (currently in progress)
 
