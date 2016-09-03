@@ -13,7 +13,7 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
-/// <reference path="../../TypeScript/reflec-ts/src/server/protocol.d.ts" />
+/// <reference path="../../reflec-ts-project/reflec-ts/src/server/protocol.d.ts" />
 declare namespace ts {
     interface MapLike<T> {
         [index: string]: T;
@@ -320,8 +320,11 @@ declare namespace ts {
         JSDocPropertyTag = 280,
         JSDocTypeLiteral = 281,
         JSDocLiteralType = 282,
-        SyntaxList = 283,
-        Count = 284,
+        JSDocNullKeyword = 283,
+        JSDocUndefinedKeyword = 284,
+        JSDocNeverKeyword = 285,
+        SyntaxList = 286,
+        Count = 287,
         FirstAssignment = 56,
         LastAssignment = 68,
         FirstReservedWord = 70,
@@ -348,7 +351,7 @@ declare namespace ts {
         FirstJSDocNode = 257,
         LastJSDocNode = 282,
         FirstJSDocTagNode = 273,
-        LastJSDocTagNode = 282,
+        LastJSDocTagNode = 285,
     }
     const enum NodeFlags {
         None = 0,
@@ -1451,10 +1454,6 @@ declare namespace ts {
     }
     interface GenericType extends InterfaceType, TypeReference {
     }
-    interface TupleType extends ObjectType {
-        elementTypes: Type[];
-        thisType?: Type;
-    }
     interface UnionOrIntersectionType extends Type {
         types: Type[];
     }
@@ -2091,8 +2090,11 @@ declare namespace ts {
         containerKind: string;
         containerName: string;
     }
+    interface ReferencedSymbolDefinitionInfo extends DefinitionInfo {
+        displayParts: SymbolDisplayPart[];
+    }
     interface ReferencedSymbol {
-        definition: DefinitionInfo;
+        definition: ReferencedSymbolDefinitionInfo;
         references: ReferenceEntry[];
     }
     enum SymbolDisplayPartKind {
@@ -2416,7 +2418,7 @@ declare namespace ts.server {
         private immediateId;
         private changeSeq;
         constructor(host: ServerHost, byteLength: (buf: string, encoding?: string) => number, hrtime: (start?: number[]) => number[], logger: Logger);
-        private handleEvent(eventName, project, fileName);
+        private handleEvent(event);
         logError(err: Error, cmd: string): void;
         private sendLineToClient(line);
         send(msg: protocol.Message): void;
@@ -2553,7 +2555,7 @@ declare namespace ts.server {
     }
     class Project {
         projectService: ProjectService;
-        projectOptions?: ProjectOptions;
+        projectOptions: ProjectOptions;
         languageServiceDiabled: boolean;
         compilerService: CompilerService;
         projectFilename: string;
@@ -2592,8 +2594,22 @@ declare namespace ts.server {
         project?: Project;
     }
     function combineProjectOutput<T>(projects: Project[], action: (project: Project) => T[], comparer?: (a: T, b: T) => number, areEqual?: (a: T, b: T) => boolean): T[];
+    type ProjectServiceEvent = {
+        eventName: "context";
+        data: {
+            project: Project;
+            fileName: string;
+        };
+    } | {
+        eventName: "configFileDiag";
+        data: {
+            triggerFile?: string;
+            configFileName: string;
+            diagnostics: Diagnostic[];
+        };
+    };
     interface ProjectServiceEventHandler {
-        (eventName: string, project: Project, fileName: string): void;
+        (event: ProjectServiceEvent): void;
     }
     interface HostConfiguration {
         formatCodeOptions: ts.FormatCodeOptions;
@@ -2602,7 +2618,7 @@ declare namespace ts.server {
     class ProjectService {
         host: ServerHost;
         psLogger: Logger;
-        eventHandler?: ProjectServiceEventHandler;
+        eventHandler: ProjectServiceEventHandler;
         filenameToScriptInfo: Map<ScriptInfo>;
         openFileRoots: ScriptInfo[];
         inferredProjects: Project[];
@@ -2620,6 +2636,7 @@ declare namespace ts.server {
         directoryWatchedForSourceFilesChanged(project: Project, fileName: string): void;
         startTimerForDetectingProjectFileListChanges(project: Project): void;
         handleProjectFileListChanges(project: Project): void;
+        reportConfigFileDiagnostics(configFileName: string, diagnostics: Diagnostic[], triggerFile?: string): void;
         directoryWatchedForTsconfigChanged(fileName: string): void;
         getCanonicalFileName(fileName: string): string;
         watchedProjectConfigFileChanged(project: Project): void;
@@ -2654,15 +2671,13 @@ declare namespace ts.server {
         configProjectIsActive(fileName: string): boolean;
         findConfiguredProjectByConfigFile(configFileName: string): Project;
         configFileToProjectOptions(configFilename: string): {
-            succeeded: boolean;
             projectOptions?: ProjectOptions;
-            errors?: Diagnostic[];
+            errors: Diagnostic[];
         };
         private exceedTotalNonTsFileSizeLimit(fileNames);
         openConfigFile(configFilename: string, clientFileName?: string): {
-            success: boolean;
             project?: Project;
-            errors?: Diagnostic[];
+            errors: Diagnostic[];
         };
         updateConfiguredProject(project: Project): Diagnostic[];
         createProject(projectFilename: string, projectOptions?: ProjectOptions, languageServiceDisabled?: boolean): Project;
@@ -2709,7 +2724,7 @@ declare namespace ts.server {
     class TextChange {
         pos: number;
         deleteLen: number;
-        insertedText?: string;
+        insertedText: string;
         constructor(pos: number, deleteLen: number, insertedText?: string);
         getTextChangeRange(): TextChangeRange;
     }
