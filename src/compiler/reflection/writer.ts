@@ -37,6 +37,7 @@ namespace ts.reflection {
                 writeIntersectionType();
                 break;
             case TypeFlags.Tuple: // let x: [string, number];
+            case TypeFlags.Reference | TypeFlags.Tuple:
                 debug.warn('Detected tuple type. Not supported yet.');
                 break;
             case TypeFlags.Anonymous:
@@ -376,11 +377,11 @@ namespace ts.reflection {
                 writeTypeProperty('type').write(' = ');
                 writeReferenceToType(ref.target).write(';').writeLine();
                 if (ref.typeArguments) {
-                    writer.write(`typeParameters: `).writeArrayStart(true);
+                    writeTypeProperty(`typeParameters`).write(' = ').writeArrayStart(true);
                     for (let argument of ref.typeArguments) {
                         writeReferenceToType(argument).write(', ');
                     }
-                    writer.writeArrayEnd(true).write(',').writeLine();
+                    writer.writeArrayEnd(true).write(';').writeLine();
                 }
             }
         }
