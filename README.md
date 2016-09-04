@@ -50,7 +50,7 @@ reflec-tsc -p /path/to/project/
 
 or you can reference `typescriptServices.js` in your IDE.
 
-~~Include `runtime-types/reflection.d.ts` in your project.~~ Now `reflection.d.ts` is included in `lib.d.ts`; if your IDE supports it, you can point to this file which contains Reflection definitions, too. I tested this with the latest release of Atom (using atom-typescript plugin), and it works well.
+Now `reflection.d.ts`, which contains all meta-interfaces, is included in `lib.d.ts`; if your IDE supports it, you can point to this file which contains Reflection definitions, too. I tested this with the latest release of Atom (using atom-typescript plugin), and it works well.
 
 **Note:** unfortunately, this version seems not to work with Visual Studio 2015. Currently it includes the 1.8.x branch of the compiler, maybe we have to wait for 2.x compatibility.
 
@@ -144,8 +144,11 @@ There are a few limitations, some of them are by design, others may be overcome 
 
 I'm defining the roadmap right now, the project will evolve to support full reflection capabilities and modularity. At the moment, there are some things that have to be completed soon:
 - ~~Support for class expressions.~~ done in v0.3.6
-- Support for other types (Union, Intersection, Literals, Tuples and so on)
-- Sample projects (currently in progress)
+- ~~Support for Union, Intersection,~~ done in v0.3.7
+- Support for Object Literals
+- Support for Tuples
+- Support for String Literals
+- Sample projects (currently in progress)s
 
 ## Disclaimer
 

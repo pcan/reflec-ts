@@ -123,6 +123,8 @@ namespace ts.reflection {
         Reference: 'reference',
         Alias: 'alias',
         ClassExpression: 'expression',
+        Union: 'union',
+        Intersection: 'intersection',
     };
 
     export function getTypeName(type: Type, statement?: Statement | Declaration): string {

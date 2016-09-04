@@ -1,0 +1,46 @@
+=== c:/root/file1.ts ===
+
+
+interface I1 {
+>I1 : Symbol(I1, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+
+    id:number;
+>id : Symbol(I1.id, Decl(file1.ts, 2, 14))
+
+    description:string;
+>description : Symbol(I1.description, Decl(file1.ts, 3, 14))
+}
+
+interface I2 {
+>I2 : Symbol(I2, Decl(file1.ts, 5, 1), Decl(file1.ts, 5, 1))
+
+    name:string;
+>name : Symbol(I2.name, Decl(file1.ts, 7, 14))
+
+    description:string;
+>description : Symbol(I2.description, Decl(file1.ts, 8, 16))
+}
+
+class MyClass {
+>MyClass : Symbol(MyClass, Decl(file1.ts, 10, 1))
+
+	union: I1 | I2;
+>union : Symbol(MyClass.union, Decl(file1.ts, 12, 15))
+>I1 : Symbol(I1, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>I2 : Symbol(I2, Decl(file1.ts, 5, 1), Decl(file1.ts, 5, 1))
+
+    intersection: I1 & I2;
+>intersection : Symbol(MyClass.intersection, Decl(file1.ts, 13, 16))
+>I1 : Symbol(I1, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>I2 : Symbol(I2, Decl(file1.ts, 5, 1), Decl(file1.ts, 5, 1))
+
+    unionAndIntersection: I1 & MyClass | I2;
+>unionAndIntersection : Symbol(MyClass.unionAndIntersection, Decl(file1.ts, 14, 26))
+>I1 : Symbol(I1, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>MyClass : Symbol(MyClass, Decl(file1.ts, 10, 1))
+>I2 : Symbol(I2, Decl(file1.ts, 5, 1), Decl(file1.ts, 5, 1))
+}
+
+
+
+

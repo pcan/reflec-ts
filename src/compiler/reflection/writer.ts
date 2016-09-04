@@ -31,10 +31,10 @@ namespace ts.reflection {
                 writeTypeReference();
                 break;
             case TypeFlags.Union:  // let x: T | U;
-                debug.warn('Detected union type. Not supported yet.');
+                writeUnionType();
                 break;
             case TypeFlags.Intersection: // let x: T & U;
-                debug.warn('Detected intersection type. Not supported yet.');
+                writeIntersectionType();
                 break;
             case TypeFlags.Tuple: // let x: [string, number];
                 debug.warn('Detected tuple type. Not supported yet.');
@@ -383,6 +383,25 @@ namespace ts.reflection {
                     writer.writeArrayEnd(true).write(',').writeLine();
                 }
             }
+        }
+
+        function writeUnionType() {
+            writeTypeKind(SerializedTypeKind.Union);
+            writeUnionOrIntersectionTypes();
+        }
+
+        function writeIntersectionType() {
+            writeTypeKind(SerializedTypeKind.Intersection);
+            writeUnionOrIntersectionTypes();
+        }
+
+        function writeUnionOrIntersectionTypes() {
+            let unionOrIntersection = <UnionOrIntersectionType>type;
+            writeTypeProperty('types').write(' = ').writeArrayStart(true);
+            for(let type of unionOrIntersection.types) {
+                writeReferenceToType(type).write(', ');
+            }
+            writer.writeArrayEnd(true).write(';').writeLine();
         }
 
         function writeAnonymousType() {
