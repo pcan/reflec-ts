@@ -1,0 +1,45 @@
+=== c:/root/file1.ts ===
+
+
+interface TypedInterface<S,T> {
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+>TypedInterface : TypedInterface<S, T>
+>S : S
+>T : T
+> : void
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : string
+
+    a: T;
+>a : T
+>T : T
+
+    b: S;
+>b : S
+>S : S
+}
+interface TypedInterface2<S, T extends TypedInterface<S,T>> {
+>TypedInterface2 : TypedInterface2<S, T>
+>S : S
+>T : T
+>TypedInterface : TypedInterface<S, T>
+>S : S
+>T : T
+}
+class MyClass {
+>MyClass : MyClass
+
+    x: TypedInterface<string, TypedInterface<number, MyClass>>;
+>x : TypedInterface<string, TypedInterface<number, MyClass>>
+>TypedInterface : TypedInterface<S, T>
+>TypedInterface : TypedInterface<S, T>
+>MyClass : MyClass
+}
+
+
+

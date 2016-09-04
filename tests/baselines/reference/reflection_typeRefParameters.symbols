@@ -1,0 +1,36 @@
+=== c:/root/file1.ts ===
+
+
+interface TypedInterface<S,T> {
+>TypedInterface : Symbol(TypedInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>S : Symbol(S, Decl(file1.ts, 2, 25))
+>T : Symbol(T, Decl(file1.ts, 2, 27))
+
+    a: T;
+>a : Symbol(TypedInterface.a, Decl(file1.ts, 2, 31))
+>T : Symbol(T, Decl(file1.ts, 2, 27))
+
+    b: S;
+>b : Symbol(TypedInterface.b, Decl(file1.ts, 3, 9))
+>S : Symbol(S, Decl(file1.ts, 2, 25))
+}
+interface TypedInterface2<S, T extends TypedInterface<S,T>> {
+>TypedInterface2 : Symbol(TypedInterface2, Decl(file1.ts, 5, 1), Decl(file1.ts, 5, 1))
+>S : Symbol(S, Decl(file1.ts, 6, 26))
+>T : Symbol(T, Decl(file1.ts, 6, 28))
+>TypedInterface : Symbol(TypedInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>S : Symbol(S, Decl(file1.ts, 6, 26))
+>T : Symbol(T, Decl(file1.ts, 6, 28))
+}
+class MyClass {
+>MyClass : Symbol(MyClass, Decl(file1.ts, 7, 1))
+
+    x: TypedInterface<string, TypedInterface<number, MyClass>>;
+>x : Symbol(MyClass.x, Decl(file1.ts, 8, 15))
+>TypedInterface : Symbol(TypedInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>TypedInterface : Symbol(TypedInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>MyClass : Symbol(MyClass, Decl(file1.ts, 7, 1))
+}
+
+
+
