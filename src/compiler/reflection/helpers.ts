@@ -41,10 +41,10 @@ namespace ts.reflection {
             return node;
         }
 
-        createVariableInitializerStatement(variableName: string, expression: Expression, modifiers?: ModifiersArray): VariableStatement {
+        createVariableInitializerStatement(variableName: string, expression: Expression, modifiers?: NodeArray<Modifier>): VariableStatement {
             const node = this.createNode<VariableStatement>(SyntaxKind.VariableStatement);
             node.modifiers = modifiers;
-            node.flags = modifiers ? modifiers.flags : NodeFlags.Let;
+            //node.flags = modifiers ? modifiers.flags : NodeFlags.Let;
             node.declarationList = this.createNode<VariableDeclarationList>(SyntaxKind.VariableDeclarationList);
             const declaration = this.createNode<VariableDeclaration>(SyntaxKind.VariableDeclaration);
             node.declarationList.declarations = <NodeArray<VariableDeclaration>>[declaration];
@@ -53,9 +53,9 @@ namespace ts.reflection {
             return node;
         }
 
-        createModifiersArray(nodeFlags: NodeFlags, modifiers: Array<Modifier>): ModifiersArray {
-            (<ModifiersArray>modifiers).flags = nodeFlags;
-            return <ModifiersArray>modifiers;
+        createModifiersArray(nodeFlags: NodeFlags, modifiers: Array<Modifier>): NodeArray<Modifier> {
+            //(<ModifiersArray>modifiers).flags = nodeFlags;
+            return <NodeArray<Modifier>>modifiers;
         }
 
         createObjectLiteralExpression<T extends ObjectLiteralElement>(properties: Array<T>): ObjectLiteralExpression {
@@ -205,7 +205,7 @@ namespace ts.reflection {
     }
 
     export function getDeclarationName(decl: DeclarationStatement) {
-        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & NodeFlags.Default ? 'default' : '';
+        return decl && decl.name && decl.name.text ? decl.name.text : getModifierFlags(decl) & ModifierFlags.Default ? 'default' : '';
     }
 
 }

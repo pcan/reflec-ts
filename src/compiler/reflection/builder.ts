@@ -96,8 +96,8 @@ namespace ts.reflection {
          */
         function createInterfaceVariableInit(declaration: InterfaceDeclaration, statementBlock: StatementsBlock, pkg: TypePackage) {
 
-            const modifiers = declaration.flags & NodeFlags.Export
-                ? builder.createModifiersArray(NodeFlags.Export | NodeFlags.Const, [builder.createNode<Modifier>(SyntaxKind.ExportKeyword)])
+            const modifiers = getModifierFlags(declaration) & ModifierFlags.Export
+                ? builder.createModifiersArray(NodeFlags.Const, [builder.createNode<Modifier>(SyntaxKind.ExportKeyword),builder.createNode<Modifier>(SyntaxKind.ConstKeyword)])
                 : builder.createModifiersArray(NodeFlags.Const, []);
 
             const statement = builder.createVariableInitializerStatement(getDeclarationName(declaration),
