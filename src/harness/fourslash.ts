@@ -266,10 +266,6 @@ namespace FourSlash {
             let compilationOptions = convertGlobalOptionsToCompilerOptions(this.testData.globalOptions);
             compilationOptions.skipDefaultLibCheck = true;
 
-            const languageServiceAdapter = this.getLanguageServiceAdapter(testType, this.cancellationToken, compilationOptions);
-            this.languageServiceAdapterHost = languageServiceAdapter.getHost();
-            this.languageService = languageServiceAdapter.getLanguageService();
-
 			// Files from tests\lib that are requested by "@libFiles"
             if (this.testData.globalOptions && this.testData.globalOptions["libFiles"]) {
                 for (const fileName of this.testData.globalOptions["libFiles"].split(",")) {
