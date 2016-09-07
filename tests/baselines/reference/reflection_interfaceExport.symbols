@@ -1,0 +1,43 @@
+=== c:/root/file1.ts ===
+
+interface PrivateInt {
+> : Symbol(
+, Decl(file1.ts, 3, 1), Decl(file1.ts, 3, 1))
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
+> : Symbol(
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
+>PrivateInt : Symbol(
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
+> : Symbol(MyClass, Decl(file1.ts, 6, 1))
+
+    id:number;
+>id : Symbol(
+.id, Decl(file1.ts, 1, 22))
+}
+export interface PublicInt {
+>PublicInt : Symbol(
+, Decl(file1.ts, 3, 1), Decl(file1.ts, 3, 1))
+
+    name:string;
+>name : Symbol(
+.name, Decl(file1.ts, 4, 28))
+}
+export class MyClass implements PrivateInt, PublicInt{
+>MyClass : Symbol(MyClass, Decl(file1.ts, 6, 1))
+>PrivateInt : Symbol(
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>PublicInt : Symbol(
+, Decl(file1.ts, 3, 1), Decl(file1.ts, 3, 1))
+
+	id:number;
+>id : Symbol(MyClass.id, Decl(file1.ts, 7, 54))
+
+    name:string;
+>name : Symbol(MyClass.name, Decl(file1.ts, 8, 11))
+}
+
+
+
+
