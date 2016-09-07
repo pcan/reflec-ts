@@ -2,7 +2,7 @@
 namespace ts {
 
     export interface Node {
-        $declarationLink?: Declaration;
+        $declarationLink?: ClassDeclaration;
     }
 
     export interface Type {

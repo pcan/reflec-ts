@@ -830,7 +830,11 @@ const _super = (function (geti, seti) {
         //
 
         function emitIdentifier(node: Identifier) {
-            if (node.emitFlags & NodeEmitFlags.UMDDefine) {
+            if (node.$declarationLink && !node.$declarationLink.name) { // default class
+                //write(getGeneratedIdentifier(node.$declarationLink.name));
+                write(getTextOfNode(getGeneratedNameForNode(node.$declarationLink), /*includeTrivia*/ false));
+            }
+            else if (node.emitFlags & NodeEmitFlags.UMDDefine) {
                 writeLines(umdHelper);
             }
             else {

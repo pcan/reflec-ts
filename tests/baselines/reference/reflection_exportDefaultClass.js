@@ -149,4 +149,4 @@ var default_1 = (function () {
 }());
 exports.__esModule = true;
 exports["default"] = default_1;
-Reflection.registerClass(default, "file1" + "#default");
+Reflection.registerClass(default_1, "file1" + "#default");
