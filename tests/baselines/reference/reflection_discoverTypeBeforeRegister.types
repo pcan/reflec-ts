@@ -2,10 +2,18 @@
 class Outer {
 > : (any: any) => void
 > : (fullyQualifiedName: string) => (any: any) => void
+> : typeof Reflection
+> : (fullyQualifiedName: string) => (any: any) => void
+> : string
+> : string
 > : string
 >Outer : Outer
 > : (any: any) => void
 > : (fullyQualifiedName: string) => (any: any) => void
+> : typeof Reflection
+> : (fullyQualifiedName: string) => (any: any) => void
+> : string
+> : string
 > : string
 
     // In this test case the type discovery process will detect 'Student' class before it is processed by the package scanner registration.

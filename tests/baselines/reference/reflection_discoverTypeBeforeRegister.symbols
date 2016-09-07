@@ -1,6 +1,8 @@
 === c:/root/file1.ts ===
 class Outer {
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
 >Outer : Symbol(Outer, Decl(file1.ts, 0, 0))
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
 
     // In this test case the type discovery process will detect 'Student' class before it is processed by the package scanner registration.
     // The bug was related to a duplicate type.$info creation, first on the discovered type object, then on the scanned one.

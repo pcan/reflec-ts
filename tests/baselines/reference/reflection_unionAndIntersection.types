@@ -3,14 +3,31 @@
 
 interface I1 {
 > : Interface
-> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
-> : string
 > : Interface
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
->I1 : I1
+> : string
+> : string
+> : Interface
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+> : string
+> : string
+>I1 : 
+
+
 > : void
 > : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof Reflection
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof MyClass
+> : string
+> : string
 > : string
 
     id:number;
@@ -21,7 +38,9 @@ interface I1 {
 }
 
 interface I2 {
->I2 : I2
+>I2 : 
+
+
 
     name:string;
 >name : string
@@ -34,20 +53,44 @@ class MyClass {
 >MyClass : MyClass
 
 	union: I1 | I2;
->union : I1 | I2
->I1 : I1
->I2 : I2
+>union : 
+
+ | 
+
+
+>I1 : 
+
+
+>I2 : 
+
+
 
     intersection: I1 & I2;
->intersection : I1 & I2
->I1 : I1
->I2 : I2
+>intersection : 
+
+ & 
+
+
+>I1 : 
+
+
+>I2 : 
+
+
 
     unionAndIntersection: I1 & MyClass | I2;
->unionAndIntersection : I2 | (I1 & MyClass)
->I1 : I1
+>unionAndIntersection : 
+
+ | (
+
+ & MyClass)
+>I1 : 
+
+
 >MyClass : MyClass
->I2 : I2
+>I2 : 
+
+
 }
 
 

@@ -61,7 +61,7 @@ namespace ts.reflection {
                 for (let statement of file.statements) {
                     if (statement.kind === SyntaxKind.ImportDeclaration && (<ImportDeclaration>statement).moduleSpecifier) {
                         let specifier = <Identifier>(<ImportDeclaration>statement).moduleSpecifier;
-                        if (specifier && specifier.text === `'*reflection'`) {
+                        if (specifier && specifier.text === '*reflection') {
                             //we use this fake literal to change the fake reflection import with the real one.
                             let literal = b.createStringLiteral(name);
                             b.commit();
@@ -122,7 +122,7 @@ namespace ts.reflection {
         }
 
         function emitReflectionForSourceFile(sourceFile: SourceFile) {
-            writer.writeObjectPropertyStart(sourceFile.$packageNameLiteral.text);
+            writer.writeObjectPropertyStart(`'${sourceFile.$packageNameLiteral.text}'`);
             writeFlatTypePackage(sourceFile.$typePackage);
             writer.writeObjectEnd().write(',').writeLine();
         }

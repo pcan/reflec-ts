@@ -3,15 +3,29 @@
 
 interface MyInterface {}
 > : Interface
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
->MyInterface : MyInterface
+> : string
+> : string
+>MyInterface : 
+
+
 > : void
 > : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof Reflection
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof default
+> : string
+> : string
 > : string
 
 export default class implements MyInterface {
->MyInterface : MyInterface
+>MyInterface : 
+
+
 
 	a: string;
 >a : string

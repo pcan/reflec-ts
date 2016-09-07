@@ -5,6 +5,11 @@ class MyClass {
 >MyClass : MyClass
 > : void
 > : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof Reflection
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof MyClass
+> : string
+> : string
 > : string
 
 	named = class NamedClassExpr {

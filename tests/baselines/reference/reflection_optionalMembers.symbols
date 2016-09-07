@@ -2,27 +2,49 @@
 
 
 interface MyInterface {
->MyInterface : Symbol(MyInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+> : Symbol(
+
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
+>MyInterface : Symbol(
+
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
 
     a:string,
->a : Symbol(MyInterface.a, Decl(file1.ts, 2, 23))
+>a : Symbol(
+
+.a, Decl(file1.ts, 2, 23))
 
     b?:number,
->b : Symbol(MyInterface.b, Decl(file1.ts, 3, 13))
+>b : Symbol(
+
+.b, Decl(file1.ts, 3, 13))
 
     c?:MyInterface;
->c : Symbol(MyInterface.c, Decl(file1.ts, 4, 14))
->MyInterface : Symbol(MyInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>c : Symbol(
+
+.c, Decl(file1.ts, 4, 14))
+>MyInterface : Symbol(
+
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
 
     d:MyInterface;
->d : Symbol(MyInterface.d, Decl(file1.ts, 5, 19))
->MyInterface : Symbol(MyInterface, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
+>d : Symbol(
+
+.d, Decl(file1.ts, 5, 19))
+>MyInterface : Symbol(
+
+, Decl(file1.ts, 0, 0), Decl(file1.ts, 0, 0))
 
     e?();
->e : Symbol(MyInterface.e, Decl(file1.ts, 6, 18))
+>e : Symbol(
+
+.e, Decl(file1.ts, 6, 18))
 
     f();
->f : Symbol(MyInterface.f, Decl(file1.ts, 7, 9))
+>f : Symbol(
+
+.f, Decl(file1.ts, 7, 9))
 }
 
 

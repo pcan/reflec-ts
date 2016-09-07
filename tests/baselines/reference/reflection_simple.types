@@ -5,6 +5,10 @@
 class Pippo {
 > : (any: any) => void
 > : (fullyQualifiedName: string) => (any: any) => void
+> : typeof Reflection
+> : (fullyQualifiedName: string) => (any: any) => void
+> : string
+> : string
 > : string
 >Pippo : Pippo
 	

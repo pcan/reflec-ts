@@ -3,6 +3,7 @@
 
 
 class Pippo {
+> : Symbol(Reflection, Decl(reflection.d.ts, 0, 0))
 >Pippo : Symbol(Pippo, Decl(file1.ts, 0, 0))
 	
 }

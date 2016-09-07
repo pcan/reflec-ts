@@ -30,7 +30,7 @@ namespace ts.reflection {
 
         createStringLiteral(string: string): StringLiteral {
             const node = this.createNode<StringLiteral>(SyntaxKind.StringLiteral, this.pos());
-            node.text = this.store(`'${string}'`);
+            node.text = this.store(string);
             node.end = this.pos();
             return node;
         }
@@ -134,20 +134,21 @@ namespace ts.reflection {
                 fixupParentReferences(statement);
                 statement.parent = parent;
             }
-            this.sourceFile.text += (this.buffer + '\n');
-            this.sourceFile.endOfFileToken = this.sourceFile.endOfFileToken || this.createNode<Node>(SyntaxKind.EndOfFileToken);
-            this.sourceFile.endOfFileToken.pos = this.sourceFile.text.length;
-            this.sourceFile.endOfFileToken.end = this.sourceFile.text.length;
-            this.buffer = '\n//';
+            // this.sourceFile.text += (this.buffer + '\n');
+            // this.sourceFile.endOfFileToken = this.sourceFile.endOfFileToken || this.createNode<Node>(SyntaxKind.EndOfFileToken);
+            // this.sourceFile.endOfFileToken.pos = this.sourceFile.text.length;
+            // this.sourceFile.endOfFileToken.end = this.sourceFile.text.length;
+            // this.buffer = '\n//';
         }
 
         private store(value: string): string {
-            this.buffer += value;
+            //this.buffer += value;
             return value;
         }
 
         private pos(): number {
-            return this.sourceFile.text.length + this.buffer.length;
+            //return this.sourceFile.text.length + this.buffer.length;
+            return -1;
         }
 
     }
