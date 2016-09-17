@@ -208,7 +208,7 @@ class MyClass {
 
 //// [file1.js]
 "use strict";
-require('./Reflection');
+require("./Reflection");
 var MyClass = (function () {
     function MyClass() {
         this.named = (function () {
@@ -239,6 +239,4 @@ var MyClass = (function () {
     }
     return MyClass;
 }());
-Reflection.registerClass(MyClass, 'file1'
-    +
-        '#MyClass');
+Reflection.registerClass(MyClass, "file1" + "#MyClass");

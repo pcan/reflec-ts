@@ -3,9 +3,16 @@
 
 interface MyInterface {
 > : Interface
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
->MyInterface : MyInterface
+> : string
+> : string
+>MyInterface : 
+
+
 
     a:string,
 >a : string
@@ -14,12 +21,20 @@ interface MyInterface {
 >b : number
 
     c?:MyInterface;
->c : MyInterface
->MyInterface : MyInterface
+>c : 
+
+
+>MyInterface : 
+
+
 
     d:MyInterface;
->d : MyInterface
->MyInterface : MyInterface
+>d : 
+
+
+>MyInterface : 
+
+
 
     e?();
 >e : () => any

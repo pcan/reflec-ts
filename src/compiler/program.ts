@@ -9,11 +9,9 @@ namespace ts {
 
     const emptyArray: any[] = [];
 
-    const defaultTypeRoots = ["node_modules/@types"];
-
-    export function findConfigFile(searchPath: string, fileExists: (fileName: string) => boolean): string {
+    export function findConfigFile(searchPath: string, fileExists: (fileName: string) => boolean, configName = "tsconfig.json"): string {
         while (true) {
-            const fileName = combinePaths(searchPath, "tsconfig.json");
+            const fileName = combinePaths(searchPath, configName);
             if (fileExists(fileName)) {
                 return fileName;
             }
@@ -169,7 +167,7 @@ namespace ts {
 
     const typeReferenceExtensions = [".d.ts"];
 
-    function getEffectiveTypeRoots(options: CompilerOptions, host: ModuleResolutionHost) {
+    export function getEffectiveTypeRoots(options: CompilerOptions, host: { directoryExists?: (directoryName: string) => boolean, getCurrentDirectory?: () => string }): string[] | undefined  {
         if (options.typeRoots) {
             return options.typeRoots;
         }
@@ -182,11 +180,37 @@ namespace ts {
             currentDirectory = host.getCurrentDirectory();
         }
 
-        if (!currentDirectory) {
-            return undefined;
-        }
-        return map(defaultTypeRoots, d => combinePaths(currentDirectory, d));
+        return currentDirectory && getDefaultTypeRoots(currentDirectory, host);
     }
+
+    /**
+     * Returns the path to every node_modules/@types directory from some ancestor directory.
+     * Returns undefined if there are none.
+     */
+    function getDefaultTypeRoots(currentDirectory: string,  host: { directoryExists?: (directoryName: string) => boolean }): string[] | undefined {
+        if (!host.directoryExists) {
+            return [combinePaths(currentDirectory, nodeModulesAtTypes)];
+            // And if it doesn't exist, tough.
+        }
+
+        let typeRoots: string[];
+
+        while (true) {
+            const atTypes = combinePaths(currentDirectory, nodeModulesAtTypes);
+            if (host.directoryExists(atTypes)) {
+                (typeRoots || (typeRoots = [])).push(atTypes);
+            }
+
+            const parent = getDirectoryPath(currentDirectory);
+            if (parent === currentDirectory) {
+                break;
+            }
+            currentDirectory = parent;
+        }
+
+        return typeRoots;
+    }
+    const nodeModulesAtTypes = combinePaths("node_modules", "@types");
 
     /**
      * @param {string | undefined} containingFile - file that contains type reference directive, can be undefined if containing file is unknown.
@@ -964,6 +988,7 @@ namespace ts {
             readFile: fileName => sys.readFile(fileName),
             trace: (s: string) => sys.write(s + newLine),
             directoryExists: directoryName => sys.directoryExists(directoryName),
+            getEnvironmentVariable: name => getEnvironmentVariable(name, /*host*/ undefined),
             getDirectories: (path: string) => sys.getDirectories(path),
             realpath
         };
@@ -1715,7 +1740,7 @@ namespace ts {
                     return false;
                 }
 
-                function checkModifiers(modifiers: ModifiersArray): boolean {
+                function checkModifiers(modifiers: NodeArray<Modifier>): boolean {
                     if (modifiers) {
                         for (const modifier of modifiers) {
                             switch (modifier.kind) {
@@ -1799,6 +1824,17 @@ namespace ts {
             let imports: LiteralExpression[];
             let moduleAugmentations: LiteralExpression[];
 
+            // If we are importing helpers, we need to add a synthetic reference to resolve the
+            // helpers library.
+            if (options.importHelpers
+                && (options.isolatedModules || isExternalModuleFile)
+                && !file.isDeclarationFile) {
+                const externalHelpersModuleReference = <StringLiteral>createNode(SyntaxKind.StringLiteral);
+                externalHelpersModuleReference.text = externalHelpersModuleNameText;
+                externalHelpersModuleReference.parent = file;
+                imports = [externalHelpersModuleReference];
+            }
+
             for (const node of file.statements) {
                 collectModuleReferences(node, /*inAmbientModule*/ false);
                 if (isJavaScriptFile) {
@@ -1832,7 +1868,7 @@ namespace ts {
                         }
                         break;
                     case SyntaxKind.ModuleDeclaration:
-                        if (isAmbientModule(<ModuleDeclaration>node) && (inAmbientModule || node.flags & NodeFlags.Ambient || isDeclarationFile(file))) {
+                        if (isAmbientModule(<ModuleDeclaration>node) && (inAmbientModule || hasModifier(node, ModifierFlags.Ambient) || isDeclarationFile(file))) {
                             const moduleName = <LiteralExpression>(<ModuleDeclaration>node).name;
                             // Ambient module declarations can be interpreted as augmentations for some existing external modules.
                             // This will happen in two cases:
@@ -2315,7 +2351,7 @@ namespace ts {
                 programDiagnostics.add(createCompilerDiagnostic(Diagnostics.Option_0_cannot_be_specified_without_specifying_option_1, "emitDecoratorMetadata", "experimentalDecorators"));
             }
 
-            if (options.reactNamespace && !isIdentifier(options.reactNamespace, languageVersion)) {
+            if (options.reactNamespace && !isIdentifierText(options.reactNamespace, languageVersion)) {
                 programDiagnostics.add(createCompilerDiagnostic(Diagnostics.Invalid_value_for_reactNamespace_0_is_not_a_valid_identifier, options.reactNamespace));
             }
 

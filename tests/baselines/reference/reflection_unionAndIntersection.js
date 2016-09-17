@@ -173,18 +173,12 @@ class MyClass {
 
 //// [file1.js]
 "use strict";
-require('./Reflection');
-var I2 = Reflection.interfaceForName('file1'
-    +
-        '#I2');
-var I1 = Reflection.interfaceForName('file1'
-    +
-        '#I1');
+require("./Reflection");
+var I2 = Reflection.interfaceForName("file1" + "#I2");
+var I1 = Reflection.interfaceForName("file1" + "#I1");
 var MyClass = (function () {
     function MyClass() {
     }
     return MyClass;
 }());
-Reflection.registerClass(MyClass, 'file1'
-    +
-        '#MyClass');
+Reflection.registerClass(MyClass, "file1" + "#MyClass");

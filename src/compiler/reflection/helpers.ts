@@ -7,14 +7,8 @@ namespace ts.reflection {
      * Helper class for synthetic AST building.
      */
     export class SourceASTBuilder {
-        /*
-        Holds a 'dummy' comment that will be appended to the sourceFile.
-        Source Identifiers point to this string through their 'pos' and 'end' properties
-        */
-        private buffer: string;
 
         constructor(private sourceFile: SourceFile) {
-            this.buffer = '\n//';
         }
 
         createNode<T extends Node>(kind: SyntaxKind, pos?: number, end?: number): T {
@@ -23,14 +17,14 @@ namespace ts.reflection {
 
         createIdentifier(text: string): Identifier {
             const node = this.createNode<Identifier>(SyntaxKind.Identifier, this.pos());
-            node.text = this.store(text);
+            node.text = text;
             node.end = this.pos();
             return node;
         }
 
-        createStringLiteral(string: string): StringLiteral {
+        createStringLiteral(stringText: string): StringLiteral {
             const node = this.createNode<StringLiteral>(SyntaxKind.StringLiteral, this.pos());
-            node.text = this.store(`'${string}'`);
+            node.text = stringText;
             node.end = this.pos();
             return node;
         }
@@ -41,10 +35,9 @@ namespace ts.reflection {
             return node;
         }
 
-        createVariableInitializerStatement(variableName: string, expression: Expression, modifiers?: ModifiersArray): VariableStatement {
+        createVariableInitializerStatement(variableName: string, expression: Expression, modifiers?: NodeArray<Modifier>): VariableStatement {
             const node = this.createNode<VariableStatement>(SyntaxKind.VariableStatement);
             node.modifiers = modifiers;
-            node.flags = modifiers ? modifiers.flags : NodeFlags.Let;
             node.declarationList = this.createNode<VariableDeclarationList>(SyntaxKind.VariableDeclarationList);
             const declaration = this.createNode<VariableDeclaration>(SyntaxKind.VariableDeclaration);
             node.declarationList.declarations = <NodeArray<VariableDeclaration>>[declaration];
@@ -52,12 +45,7 @@ namespace ts.reflection {
             declaration.initializer = expression;
             return node;
         }
-
-        createModifiersArray(nodeFlags: NodeFlags, modifiers: Array<Modifier>): ModifiersArray {
-            (<ModifiersArray>modifiers).flags = nodeFlags;
-            return <ModifiersArray>modifiers;
-        }
-
+        
         createObjectLiteralExpression<T extends ObjectLiteralElement>(properties: Array<T>): ObjectLiteralExpression {
             const node = this.createNode<ObjectLiteralExpression>(SyntaxKind.ObjectLiteralExpression);
             node.properties = <NodeArray<T>>properties;
@@ -134,20 +122,10 @@ namespace ts.reflection {
                 fixupParentReferences(statement);
                 statement.parent = parent;
             }
-            this.sourceFile.text += (this.buffer + '\n');
-            this.sourceFile.endOfFileToken = this.sourceFile.endOfFileToken || this.createNode<Node>(SyntaxKind.EndOfFileToken);
-            this.sourceFile.endOfFileToken.pos = this.sourceFile.text.length;
-            this.sourceFile.endOfFileToken.end = this.sourceFile.text.length;
-            this.buffer = '\n//';
-        }
-
-        private store(value: string): string {
-            this.buffer += value;
-            return value;
         }
 
         private pos(): number {
-            return this.sourceFile.text.length + this.buffer.length;
+            return -1;
         }
 
     }
@@ -205,7 +183,7 @@ namespace ts.reflection {
     }
 
     export function getDeclarationName(decl: DeclarationStatement) {
-        return decl && decl.name && decl.name.text ? decl.name.text : decl.flags & NodeFlags.Default ? 'default' : '';
+        return decl && decl.name && decl.name.text ? decl.name.text : getModifierFlags(decl) & ModifierFlags.Default ? 'default' : '';
     }
 
 }

@@ -137,10 +137,8 @@ export default class implements MyInterface {
 
 //// [file1.js]
 "use strict";
-require('./Reflection');
-var MyInterface = Reflection.interfaceForName('file1'
-    +
-        '#MyInterface');
+require("./Reflection");
+var MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");
 var default_1 = (function () {
     function default_1() {
     }
@@ -151,6 +149,4 @@ var default_1 = (function () {
 }());
 exports.__esModule = true;
 exports["default"] = default_1;
-Reflection.registerClass(default_1, 'file1'
-    +
-        '#default');
+Reflection.registerClass(default_1, "file1" + "#default");

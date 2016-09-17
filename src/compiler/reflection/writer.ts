@@ -110,7 +110,7 @@ namespace ts.reflection {
         function writeStaticMembers() {
             if (type.symbol.declarations && type.symbol.declarations.length > 0) {
                 let declaration = <ClassLikeDeclaration>type.symbol.declarations[0];
-                let statics = declaration.members.filter(member => member.flags & NodeFlags.Static);
+                let statics = declaration.members.filter(member => getModifierFlags(member) & ModifierFlags.Static);
                 if (statics.length > 0) {
                     writeTypeProperty('statics').write(' = ').writeArrayStart();
                     for (let member of statics) {

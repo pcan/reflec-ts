@@ -3,16 +3,33 @@
 
 interface TypedInterface<S,T> {
 > : Interface
-> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
-> : string
 > : Interface
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
->TypedInterface : TypedInterface<S, T>
+> : string
+> : string
+> : Interface
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+> : string
+> : string
+>TypedInterface : 
+
+<S, T>
 >S : S
 >T : T
 > : void
 > : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof Reflection
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof MyClass
+> : string
+> : string
 > : string
 
     a: T;
@@ -24,10 +41,14 @@ interface TypedInterface<S,T> {
 >S : S
 }
 interface TypedInterface2<S, T extends TypedInterface<S,T>> {
->TypedInterface2 : TypedInterface2<S, T>
+>TypedInterface2 : 
+
+<S, T>
 >S : S
 >T : T
->TypedInterface : TypedInterface<S, T>
+>TypedInterface : 
+
+<S, T>
 >S : S
 >T : T
 }
@@ -35,9 +56,17 @@ class MyClass {
 >MyClass : MyClass
 
     x: TypedInterface<string, TypedInterface<number, MyClass>>;
->x : TypedInterface<string, TypedInterface<number, MyClass>>
->TypedInterface : TypedInterface<S, T>
->TypedInterface : TypedInterface<S, T>
+>x : 
+
+<string, 
+
+<number, MyClass>>
+>TypedInterface : 
+
+<S, T>
+>TypedInterface : 
+
+<S, T>
 >MyClass : MyClass
 }
 

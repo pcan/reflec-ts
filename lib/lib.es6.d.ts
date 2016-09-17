@@ -1077,6 +1077,12 @@ interface ReadonlyArray<T> {
       */
     map<U>(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => U, thisArg?: any): U[];
     /**
+     * Returns the elements of an array that meet the condition specified in a callback function.
+     * @param callbackfn A function that accepts up to three arguments. The filter method calls the callbackfn function one time for each element in the array.
+     * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+     */
+    filter<S extends T>(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => value is S, thisArg?: any): S[];
+    /**
       * Returns the elements of an array that meet the condition specified in a callback function.
       * @param callbackfn A function that accepts up to three arguments. The filter method calls the callbackfn function one time for each element in the array.
       * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
@@ -4672,7 +4678,6 @@ interface MapConstructor {
 declare var Map: MapConstructor;
 
 interface WeakMap<K, V> {
-    clear(): void;
     delete(key: K): boolean;
     get(key: K): V | undefined;
     has(key: K): boolean;
@@ -4704,7 +4709,6 @@ declare var Set: SetConstructor;
 
 interface WeakSet<T> {
     add(value: T): this;
-    clear(): void;
     delete(value: T): boolean;
     has(value: T): boolean;
 }
