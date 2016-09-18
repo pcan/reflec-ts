@@ -1,0 +1,27 @@
+{
+    "name": "reflec-ts-runtime",
+    "author": "Pierantonio Cangianiello",
+    "homepage": "https://github.com/pcan/reflec-ts",
+    "version": "0.3.8",
+    "license": "MIT",
+    "description": "Reflec-ts compiler runtime support",
+    "keywords": [
+		"reflec-ts",
+		"reflection",
+        "TypeScript",
+        "compiler",
+        "language",
+        "javascript"
+    ],
+    "bugs": {
+        "url": "https://github.com/pcan/reflec-ts/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pcan/reflec-ts.git"
+    },
+    "main": "reflec-ts-runtime.js",
+    "engines": {
+        "node": ">=0.8.0"
+    }
+}

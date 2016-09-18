@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "target": "ES3",
+        "outDir": "."
+    },
+    "compileOnSave": true,
+    "atom": {
+        "rewriteTsconfig": true
+    },
+    "filesGlob": [
+        "./src/**/*.ts"
+    ],
+    "files": [
+        "./src/reflec-ts-runtime.ts"
+    ]
+}
