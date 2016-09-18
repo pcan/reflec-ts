@@ -3,8 +3,10 @@
 A enhanced (unofficial) version of the [TypeScript compiler](https://github.com/Microsoft/TypeScript) that provides Reflection capabilities.
 
 ## Installing
-Releases follow the official ones, so I try to keep the same scheme. For the latest stable version:
 
+### Compiler
+
+Releases follow the official ones, so I try to keep the same scheme. For the latest stable version:
 
 ```shell
 npm install -g reflec-ts
@@ -17,6 +19,16 @@ npm install -g reflec-ts@next
 ```
 
 I try to keep reflec-ts master aligned with the official one, at least weekly.
+
+### Runtime support
+
+In your project add the reflec-ts runtime support:
+
+```shell
+npm install --save reflec-ts-runtime
+```
+
+This library replaces the embedded functions that were emitted in Reflection.js alongwith types metadata. This allows us to evolve runtime reflection support with more agility, keeping the type definitions file as compact as possible.
 
 ## Examples
 
