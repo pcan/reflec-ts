@@ -487,7 +487,7 @@ namespace ts {
         parent?: Node;                                  // Parent node (initialized by binding)
         /* @internal */ original?: Node;                // The original node if this is an updated node.
         /* @internal */ startsOnNewLine?: boolean;      // Whether a synthesized node should start on a new line (used by transforms).
-        /* @internal */ jsDocComments?: JSDocComment[]; // JSDoc for the node, if it has any.  Only for .js files.
+        /* @internal */ jsDocComments?: JSDoc[];        // JSDoc for the node, if it has any.
         /* @internal */ symbol?: Symbol;                // Symbol declared by node (initialized by binding)
         /* @internal */ locals?: SymbolTable;           // Locals associated with node (initialized by binding)
         /* @internal */ nextContainer?: Node;           // Next container in declaration order (initialized by binding)
@@ -688,14 +688,20 @@ namespace ts {
     }
 
     export interface BindingPattern extends Node {
-        elements: NodeArray<BindingElement>;
+        elements: NodeArray<BindingElement | ArrayBindingElement>;
     }
 
     // @kind(SyntaxKind.ObjectBindingPattern)
-    export interface ObjectBindingPattern extends BindingPattern { }
+    export interface ObjectBindingPattern extends BindingPattern {
+        elements: NodeArray<BindingElement>;
+    }
+
+    export type ArrayBindingElement = BindingElement | OmittedExpression;
 
     // @kind(SyntaxKind.ArrayBindingPattern)
-    export interface ArrayBindingPattern extends BindingPattern { }
+    export interface ArrayBindingPattern extends BindingPattern {
+        elements: NodeArray<ArrayBindingElement>;
+    }
 
     /**
      * Several node kinds share function-like features such as a signature,
@@ -868,7 +874,9 @@ namespace ts {
     }
 
     // @kind(SyntaxKind.OmittedExpression)
-    export interface OmittedExpression extends Expression { }
+    export interface OmittedExpression extends Expression {
+        _omittedExpressionBrand: any;
+    }
 
     // Represents an expression that is elided as part of a transformation to emit comments on a
     // not-emitted node. The 'expression' property of a NotEmittedExpression should be emitted.
@@ -1547,7 +1555,7 @@ namespace ts {
 
     // @kind(SyntaxKind.JSDocRecordType)
     export interface JSDocRecordType extends JSDocType, TypeLiteralNode {
-        members: NodeArray<JSDocRecordMember>;
+        literal: TypeLiteralNode;
     }
 
     // @kind(SyntaxKind.JSDocTypeReference)
@@ -1595,14 +1603,16 @@ namespace ts {
     }
 
     // @kind(SyntaxKind.JSDocComment)
-    export interface JSDocComment extends Node {
+    export interface JSDoc extends Node {
         tags: NodeArray<JSDocTag>;
+        comment: string | undefined;
     }
 
     // @kind(SyntaxKind.JSDocTag)
     export interface JSDocTag extends Node {
         atToken: Node;
         tagName: Identifier;
+        comment: string | undefined;
     }
 
     // @kind(SyntaxKind.JSDocTemplateTag)
@@ -1641,9 +1651,13 @@ namespace ts {
 
     // @kind(SyntaxKind.JSDocParameterTag)
     export interface JSDocParameterTag extends JSDocTag {
+        /** the parameter name, if provided *before* the type (TypeScript-style) */
         preParameterName?: Identifier;
         typeExpression?: JSDocTypeExpression;
+        /** the parameter name, if provided *after* the type (JSDoc-standard) */
         postParameterName?: Identifier;
+        /** the parameter name, regardless of the location it was provided */
+        parameterName: Identifier;
         isBracketed: boolean;
     }
 
@@ -1799,6 +1813,8 @@ namespace ts {
           * @param path The path to test.
           */
         fileExists(path: string): boolean;
+
+        readFile(path: string): string;
     }
 
     export interface WriteFileCallback {
@@ -2128,7 +2144,7 @@ namespace ts {
         writeReturnTypeOfSignatureDeclaration(signatureDeclaration: SignatureDeclaration, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
         writeTypeOfExpression(expr: Expression, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
         writeBaseConstructorTypeOfClass(node: ClassLikeDeclaration, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
-        isSymbolAccessible(symbol: Symbol, enclosingDeclaration: Node, meaning: SymbolFlags): SymbolAccessibilityResult;
+        isSymbolAccessible(symbol: Symbol, enclosingDeclaration: Node, meaning: SymbolFlags, shouldComputeAliasToMarkVisible: boolean): SymbolAccessibilityResult;
         isEntityNameVisible(entityName: EntityNameOrEntityNameExpression, enclosingDeclaration: Node): SymbolVisibilityResult;
         // Returns the constant value this property access resolves to, or 'undefined' for a non-constant
         getConstantValue(node: EnumMember | PropertyAccessExpression | ElementAccessExpression): number;
@@ -2585,13 +2601,14 @@ namespace ts {
     export interface TypeInferences {
         primary: Type[];    // Inferences made directly to a type parameter
         secondary: Type[];  // Inferences made to a type parameter in a union type
+        topLevel: boolean;  // True if all inferences were made from top-level (not nested in object type) locations
         isFixed: boolean;   // Whether the type parameter is fixed, as defined in section 4.12.2 of the TypeScript spec
                             // If a type parameter is fixed, no more inferences can be made for the type parameter
     }
 
     /* @internal */
     export interface InferenceContext {
-        typeParameters: TypeParameter[];    // Type parameters for which inferences are made
+        signature: Signature;               // Generic signature for which inferences are made
         inferUnionTypes: boolean;           // Infer union types for disjoint candidates (otherwise undefinedType)
         inferences: TypeInferences[];       // Inferences made for each type parameter
         inferredTypes: Type[];              // Inferred type for each type parameter

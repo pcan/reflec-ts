@@ -8,16 +8,16 @@ interface TypedInterface<S,T> {
 > : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
-> : string
-> : string
+> : "file1"
+> : "#TypedInterface2"
 > : Interface
 > : Interface
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
-> : string
-> : string
+> : "file1"
+> : "#TypedInterface"
 >TypedInterface : 
 
 <S, T>
@@ -29,8 +29,8 @@ interface TypedInterface<S,T> {
 > : (constructor: Function, fullyQualifiedName: string) => void
 > : typeof MyClass
 > : string
-> : string
-> : string
+> : "file1"
+> : "#MyClass"
 
     a: T;
 >a : T

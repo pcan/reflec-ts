@@ -164,8 +164,8 @@ class MyClass {
 //// [file1.js]
 "use strict";
 require("./Reflection");
-var TypedInterface2 = Reflection.interfaceForName("file1" + "#TypedInterface2");
-var TypedInterface = Reflection.interfaceForName("file1" + "#TypedInterface");
+const TypedInterface2 = Reflection.interfaceForName("file1" + "#TypedInterface2");
+const TypedInterface = Reflection.interfaceForName("file1" + "#TypedInterface");
 var MyClass = (function () {
     function MyClass() {
     }

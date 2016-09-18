@@ -8,8 +8,8 @@ class Pippo {
 > : typeof Reflection
 > : (fullyQualifiedName: string) => (any: any) => void
 > : string
-> : string
-> : string
+> : "file1"
+> : "#Pippo"
 >Pippo : Pippo
 	
 }

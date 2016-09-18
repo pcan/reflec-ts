@@ -162,4 +162,4 @@ interface MyInterface {
 //// [file1.js]
 "use strict";
 require("./Reflection");
-var MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");
+const MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");

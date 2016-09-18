@@ -8,8 +8,8 @@ interface MyInterface {}
 > : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
-> : string
-> : string
+> : "file1"
+> : "#MyInterface"
 >MyInterface : 
 
 
@@ -19,8 +19,8 @@ interface MyInterface {}
 > : (constructor: Function, fullyQualifiedName: string) => void
 > : typeof default
 > : string
-> : string
-> : string
+> : "file1"
+> : "#default"
 
 export default class implements MyInterface {
 >MyInterface : 

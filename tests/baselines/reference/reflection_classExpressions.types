@@ -9,8 +9,8 @@ class MyClass {
 > : (constructor: Function, fullyQualifiedName: string) => void
 > : typeof MyClass
 > : string
-> : string
-> : string
+> : "file1"
+> : "#MyClass"
 
 	named = class NamedClassExpr {
 >named : typeof NamedClassExpr
