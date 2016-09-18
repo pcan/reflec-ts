@@ -268,7 +268,7 @@ namespace ts {
                     Debug.assert(node.parent.kind === SyntaxKind.JSDocFunctionType);
                     let functionType = <JSDocFunctionType>node.parent;
                     let index = indexOf(functionType.parameters, node);
-                    return "p" + index;
+                    return "arg" + index;
                 case SyntaxKind.JSDocTypedefTag:
                     const parentNode = node.parent && node.parent.parent;
                     let nameFromParentNode: string;
@@ -540,9 +540,7 @@ namespace ts {
             // because the scope of JsDocComment should not be affected by whether the current node is a
             // container or not.
             if (isInJavaScriptFile(node) && node.jsDocComments) {
-                for (const jsDocComment of node.jsDocComments) {
-                    bind(jsDocComment);
-                }
+                forEach(node.jsDocComments, bind);
             }
             if (checkUnreachable(node)) {
                 forEachChild(node, bind);
@@ -590,6 +588,9 @@ namespace ts {
                     break;
                 case SyntaxKind.PrefixUnaryExpression:
                     bindPrefixUnaryExpressionFlow(<PrefixUnaryExpression>node);
+                    break;
+                case SyntaxKind.PostfixUnaryExpression:
+                    bindPostfixUnaryExpressionFlow(<PostfixUnaryExpression>node);
                     break;
                 case SyntaxKind.BinaryExpression:
                     bindBinaryExpressionFlow(<BinaryExpression>node);
@@ -1106,6 +1107,16 @@ namespace ts {
             }
             else {
                 forEachChild(node, bind);
+                if (node.operator === SyntaxKind.PlusEqualsToken || node.operator === SyntaxKind.MinusMinusToken) {
+                    bindAssignmentTargetFlow(node.operand);
+                }
+            }
+        }
+
+        function bindPostfixUnaryExpressionFlow(node: PostfixUnaryExpression) {
+            forEachChild(node, bind);
+            if (node.operator === SyntaxKind.PlusPlusToken || node.operator === SyntaxKind.MinusMinusToken) {
+                bindAssignmentTargetFlow(node.operand);
             }
         }
 
@@ -1150,8 +1161,8 @@ namespace ts {
             currentFlow = finishFlowLabel(postExpressionLabel);
         }
 
-        function bindInitializedVariableFlow(node: VariableDeclaration | BindingElement) {
-            const name = node.name;
+        function bindInitializedVariableFlow(node: VariableDeclaration | ArrayBindingElement) {
+            const name = !isOmittedExpression(node) ? node.name : undefined;
             if (isBindingPattern(name)) {
                 for (const child of name.elements) {
                     bindInitializedVariableFlow(child);

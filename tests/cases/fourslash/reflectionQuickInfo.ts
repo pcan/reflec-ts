@@ -19,7 +19,7 @@ goTo.marker('2');
 verify.quickInfoIs('var x: Class');
 
 goTo.marker('3');
-verify.quickInfoIs('(property) Class.implements: Interface[]');
+verify.quickInfoIs('(property) Class.implements: Interface[]', 'Implemented interfaces.');
 
 goTo.marker('4');
 verify.quickInfoIs('var y: Interface');

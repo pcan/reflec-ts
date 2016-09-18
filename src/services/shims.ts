@@ -179,6 +179,12 @@ namespace ts {
 
         /**
          * Returns a JSON-encoded value of the type:
+         * { fileName: string; textSpan: { start: number; length: number}; }[]
+         */
+        getImplementationAtPosition(fileName: string, position: number): string;
+
+        /**
+         * Returns a JSON-encoded value of the type:
          * { fileName: string; textSpan: { start: number; length: number}; isWriteAccess: boolean, isDefinition?: boolean }[]
          */
         getReferencesAtPosition(fileName: string, position: number): string;
@@ -209,7 +215,7 @@ namespace ts {
          * Returns a JSON-encoded value of the type:
          * { name: string; kind: string; kindModifiers: string; containerName: string; containerKind: string; matchKind: string; fileName: string; textSpan: { start: number; length: number}; } [] = [];
          */
-        getNavigateToItems(searchValue: string, maxResultCount?: number): string;
+        getNavigateToItems(searchValue: string, maxResultCount?: number, fileName?: string): string;
 
         /**
          * Returns a JSON-encoded value of the type:
@@ -798,6 +804,19 @@ namespace ts {
             );
         }
 
+        /// GOTO Implementation
+
+        /**
+         * Computes the implementation location of the symbol
+         * at the requested position.
+         */
+        public getImplementationAtPosition(fileName: string, position: number): string {
+            return this.forwardJSONCall(
+                `getImplementationAtPosition('${fileName}', ${position})`,
+                () => this.languageService.getImplementationAtPosition(fileName, position)
+            );
+        }
+
         public getRenameInfo(fileName: string, position: number): string {
             return this.forwardJSONCall(
                 `getRenameInfo('${fileName}', ${position})`,
@@ -930,10 +949,10 @@ namespace ts {
         /// NAVIGATE TO
 
         /** Return a list of symbols that are interesting to navigate to */
-        public getNavigateToItems(searchValue: string, maxResultCount?: number): string {
+        public getNavigateToItems(searchValue: string, maxResultCount?: number, fileName?: string): string {
             return this.forwardJSONCall(
-                `getNavigateToItems('${searchValue}', ${maxResultCount})`,
-                () => this.languageService.getNavigateToItems(searchValue, maxResultCount)
+                `getNavigateToItems('${searchValue}', ${maxResultCount}, ${fileName})`,
+                () => this.languageService.getNavigateToItems(searchValue, maxResultCount, fileName)
             );
         }
 

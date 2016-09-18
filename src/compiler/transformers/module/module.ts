@@ -660,7 +660,9 @@ namespace ts {
         function addExportMemberAssignmentsForBindingName(resultStatements: Statement[], name: BindingName): void {
             if (isBindingPattern(name)) {
                 for (const element of name.elements) {
-                    addExportMemberAssignmentsForBindingName(resultStatements, element.name);
+                    if (!isOmittedExpression(element)) {
+                        addExportMemberAssignmentsForBindingName(resultStatements, element.name);
+                    }
                 }
             }
             else {
@@ -703,7 +705,7 @@ namespace ts {
                         createFunctionDeclaration(
                             /*decorators*/ undefined,
                             /*modifiers*/ undefined,
-                            /*asteriskToken*/ undefined,
+                            node.asteriskToken,
                             name,
                             /*typeParameters*/ undefined,
                             node.parameters,
@@ -802,17 +804,17 @@ namespace ts {
          * Adds a trailing VariableStatement for an enum or module declaration.
          */
         function addVarForExportedEnumOrNamespaceDeclaration(statements: Statement[], node: EnumDeclaration | ModuleDeclaration) {
-            statements.push(
-                createVariableStatement(
-                    /*modifiers*/ undefined,
-                    [createVariableDeclaration(
-                        getDeclarationName(node),
+            const transformedStatement = createVariableStatement(
+                /*modifiers*/ undefined,
+                [createVariableDeclaration(
+                    getDeclarationName(node),
                         /*type*/ undefined,
-                        createPropertyAccess(createIdentifier("exports"), getDeclarationName(node))
-                    )],
+                    createPropertyAccess(createIdentifier("exports"), getDeclarationName(node))
+                )],
                     /*location*/ node
-                )
             );
+            setNodeEmitFlags(transformedStatement, NodeEmitFlags.NoComments);
+            statements.push(transformedStatement);
         }
 
         function getDeclarationName(node: DeclarationStatement) {

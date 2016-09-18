@@ -8,8 +8,8 @@ interface MyInterface {
 > : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
-> : string
-> : string
+> : "file1"
+> : "#MyInterface"
 >MyInterface : 
 
 

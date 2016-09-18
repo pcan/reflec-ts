@@ -7,16 +7,16 @@ interface PrivateInt {
 > : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
-> : string
-> : string
+> : "file1"
+> : "#PublicInt"
 > : Interface
 > : Interface
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : typeof Reflection
 > : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
 > : string
-> : string
-> : string
+> : "file1"
+> : "#PrivateInt"
 >PrivateInt : 
 
 > : void
@@ -25,8 +25,8 @@ interface PrivateInt {
 > : (constructor: Function, fullyQualifiedName: string) => void
 > : typeof MyClass
 > : string
-> : string
-> : string
+> : "file1"
+> : "#MyClass"
 
     id:number;
 >id : number

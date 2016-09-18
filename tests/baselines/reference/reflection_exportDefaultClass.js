@@ -138,7 +138,7 @@ export default class implements MyInterface {
 //// [file1.js]
 "use strict";
 require("./Reflection");
-var MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");
+const MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");
 var default_1 = (function () {
     function default_1() {
     }

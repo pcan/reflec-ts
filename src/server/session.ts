@@ -111,6 +111,7 @@ namespace ts.server {
         export const Formatonkey = "formatonkey";
         export const Geterr = "geterr";
         export const GeterrForProject = "geterrForProject";
+        export const Implementation = "implementation";
         export const SemanticDiagnosticsSync = "semanticDiagnosticsSync";
         export const SyntacticDiagnosticsSync = "syntacticDiagnosticsSync";
         export const NavBar = "navbar";
@@ -360,6 +361,28 @@ namespace ts.server {
                 file: def.fileName,
                 start: compilerService.host.positionToLineOffset(def.fileName, def.textSpan.start),
                 end: compilerService.host.positionToLineOffset(def.fileName, ts.textSpanEnd(def.textSpan))
+            }));
+        }
+
+        private getImplementation(line: number, offset: number, fileName: string): protocol.FileSpan[] {
+            const file = ts.normalizePath(fileName);
+            const project = this.projectService.getProjectForFile(file);
+            if (!project || project.languageServiceDiabled) {
+                throw Errors.NoProject;
+            }
+
+            const compilerService = project.compilerService;
+            const implementations = compilerService.languageService.getImplementationAtPosition(file,
+                compilerService.host.lineOffsetToPosition(file, line, offset));
+
+            if (!implementations) {
+                return undefined;
+            }
+
+            return implementations.map(impl => ({
+                file: impl.fileName,
+                start: compilerService.host.positionToLineOffset(impl.fileName, impl.textSpan.start),
+                end: compilerService.host.positionToLineOffset(impl.fileName, ts.textSpanEnd(impl.textSpan))
             }));
         }
 
@@ -940,7 +963,7 @@ namespace ts.server {
             return this.decorateNavigationBarItem(project, fileName, items, compilerService.host.getLineIndex(fileName));
         }
 
-        private getNavigateToItems(searchValue: string, fileName: string, maxResultCount?: number): protocol.NavtoItem[] {
+        private getNavigateToItems(searchValue: string, fileName: string, maxResultCount?: number, currentFileOnly?: boolean): protocol.NavtoItem[] {
             const file = ts.normalizePath(fileName);
             const info = this.projectService.getScriptInfo(file);
             const projects = this.projectService.findReferencingProjects(info);
@@ -953,7 +976,7 @@ namespace ts.server {
                 projectsWithLanguageServiceEnabeld,
                 (project: Project) => {
                     const compilerService = project.compilerService;
-                    const navItems = compilerService.languageService.getNavigateToItems(searchValue, maxResultCount);
+                    const navItems = compilerService.languageService.getNavigateToItems(searchValue, maxResultCount, currentFileOnly ? fileName : undefined);
                     if (!navItems) {
                         return [];
                     }
@@ -1090,6 +1113,10 @@ namespace ts.server {
                 const defArgs = <protocol.FileLocationRequestArgs>request.arguments;
                 return { response: this.getTypeDefinition(defArgs.line, defArgs.offset, defArgs.file), responseRequired: true };
             },
+            [CommandNames.Implementation]: (request: protocol.Request) => {
+                const implArgs = <protocol.FileLocationRequestArgs>request.arguments;
+                return { response: this.getImplementation(implArgs.line, implArgs.offset, implArgs.file), responseRequired: true };
+            },
             [CommandNames.References]: (request: protocol.Request) => {
                 const defArgs = <protocol.FileLocationRequestArgs>request.arguments;
                 return { response: this.getReferences(defArgs.line, defArgs.offset, defArgs.file), responseRequired: true };
@@ -1188,7 +1215,7 @@ namespace ts.server {
             },
             [CommandNames.Navto]: (request: protocol.Request) => {
                 const navtoArgs = <protocol.NavtoRequestArgs>request.arguments;
-                return { response: this.getNavigateToItems(navtoArgs.searchValue, navtoArgs.file, navtoArgs.maxResultCount), responseRequired: true };
+                return { response: this.getNavigateToItems(navtoArgs.searchValue, navtoArgs.file, navtoArgs.maxResultCount, navtoArgs.currentFileOnly), responseRequired: true };
             },
             [CommandNames.Brace]: (request: protocol.Request) => {
                 const braceArguments = <protocol.FileLocationRequestArgs>request.arguments;
