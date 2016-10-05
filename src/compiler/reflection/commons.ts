@@ -93,7 +93,6 @@ namespace ts.reflection {
     IntrinsicTypes[TypeFlags.Boolean] = buildIntrinsicType('boolean');
     IntrinsicTypes[TypeFlags.Void] = buildIntrinsicType('void');
     IntrinsicTypes[TypeFlags.ESSymbol] = buildIntrinsicType('symbol');
-    IntrinsicTypes[TypeFlags.ThisType] = buildIntrinsicType('this');
     IntrinsicTypes[TypeFlags.Undefined] = buildIntrinsicType('undefined');
     IntrinsicTypes[TypeFlags.Null] = buildIntrinsicType('null');
     IntrinsicTypes[TypeFlags.Never] = buildIntrinsicType('never');

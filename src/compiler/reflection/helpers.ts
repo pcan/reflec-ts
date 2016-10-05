@@ -45,12 +45,6 @@ namespace ts.reflection {
             declaration.initializer = expression;
             return node;
         }
-        
-        createObjectLiteralExpression<T extends ObjectLiteralElement>(properties: Array<T>): ObjectLiteralExpression {
-            const node = this.createNode<ObjectLiteralExpression>(SyntaxKind.ObjectLiteralExpression);
-            node.properties = <NodeArray<T>>properties;
-            return node;
-        }
 
         createBinaryExpression(left: Expression, operatorToken: Node, right: Expression): BinaryExpression {
             const node = this.createNode<BinaryExpression>(SyntaxKind.BinaryExpression);

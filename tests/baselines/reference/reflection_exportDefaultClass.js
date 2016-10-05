@@ -42,7 +42,6 @@ export default class implements MyInterface {
     var _type_undefined = {kind: 'undefined'};
     var _type_null = {kind: 'null'};
     var _type_never = {kind: 'never'};
-    var _type_this = {kind: 'this'};
     Reflection.$libs['default'] = {
         'file1' : {
             'MyInterface': _l[0],

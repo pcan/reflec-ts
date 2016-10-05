@@ -52,7 +52,6 @@ class MyClass {
     var _type_undefined = {kind: 'undefined'};
     var _type_null = {kind: 'null'};
     var _type_never = {kind: 'never'};
-    var _type_this = {kind: 'this'};
     Reflection.$libs['default'] = {
         'file1' : {
             'MyClass': _l[0],
