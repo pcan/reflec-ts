@@ -964,7 +964,11 @@ namespace ts {
                 currentFlow = preTryFlow;
                 bind(node.finallyBlock);
             }
-            currentFlow = finishFlowLabel(postFinallyLabel);
+            // if try statement has finally block and flow after finally block is unreachable - keep it
+            // otherwise use whatever flow was accumulated at postFinallyLabel
+            if (!node.finallyBlock || !(currentFlow.flags & FlowFlags.Unreachable)) {
+                currentFlow = finishFlowLabel(postFinallyLabel);
+            }
         }
 
         function bindSwitchStatement(node: SwitchStatement): void {
@@ -2428,8 +2432,7 @@ namespace ts {
         }
 
         // If the parameter's name is 'this', then it is TypeScript syntax.
-        if (subtreeFlags & TransformFlags.ContainsDecorators
-            || (name && isIdentifier(name) && name.originalKeywordKind === SyntaxKind.ThisKeyword)) {
+        if (subtreeFlags & TransformFlags.ContainsDecorators || isThisIdentifier(name)) {
             transformFlags |= TransformFlags.AssertTypeScript;
         }
 
@@ -2592,7 +2595,7 @@ namespace ts {
         }
 
         // Currently, we only support generators that were originally async function bodies.
-        if (asteriskToken && node.emitFlags & NodeEmitFlags.AsyncFunctionBody) {
+        if (asteriskToken && getEmitFlags(node) & EmitFlags.AsyncFunctionBody) {
             transformFlags |= TransformFlags.AssertGenerator;
         }
 
@@ -2667,7 +2670,7 @@ namespace ts {
             // down-level generator.
             // Currently we do not support transforming any other generator fucntions
             // down level.
-            if (asteriskToken && node.emitFlags & NodeEmitFlags.AsyncFunctionBody) {
+            if (asteriskToken && getEmitFlags(node) & EmitFlags.AsyncFunctionBody) {
                 transformFlags |= TransformFlags.AssertGenerator;
             }
         }
@@ -2698,7 +2701,7 @@ namespace ts {
         // down-level generator.
         // Currently we do not support transforming any other generator fucntions
         // down level.
-        if (asteriskToken && node.emitFlags & NodeEmitFlags.AsyncFunctionBody) {
+        if (asteriskToken && getEmitFlags(node) & EmitFlags.AsyncFunctionBody) {
             transformFlags |= TransformFlags.AssertGenerator;
         }
 

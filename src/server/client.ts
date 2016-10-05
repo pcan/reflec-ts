@@ -214,6 +214,7 @@ namespace ts.server {
             const response = this.processResponse<protocol.CompletionsResponse>(request);
 
             return {
+                isGlobalCompletion: false,
                 isMemberCompletion: false,
                 isNewIdentifierLocation: false,
                 entries: response.body.map(entry => {
@@ -675,6 +676,10 @@ namespace ts.server {
         }
 
         getNonBoundSourceFile(fileName: string): SourceFile {
+            throw new Error("SourceFile objects are not serializable through the server protocol.");
+        }
+
+        getSourceFile(fileName: string): SourceFile {
             throw new Error("SourceFile objects are not serializable through the server protocol.");
         }
 
