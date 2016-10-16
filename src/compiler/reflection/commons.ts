@@ -23,7 +23,7 @@ namespace ts {
         compilerOptions: CompilerOptions;
     }
 
-    export type StatementsBlock = DefaultClause;
+    export type StatementsBlock = Block | SourceFile | ModuleBlock;
     export type TypeDeclaration = DeclarationStatement;
 
 }

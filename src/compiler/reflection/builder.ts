@@ -141,7 +141,7 @@ namespace ts.reflection {
             const packageAndType = (typePackage.fullName ? typePackage.fullName + '.' : '') + typeName;
             return builder.createBinaryExpression(
                 sourceFile.$packageNameLiteral,
-                builder.createNode<Node>(SyntaxKind.PlusToken),
+                builder.createToken(SyntaxKind.PlusToken),
                 builder.createStringLiteral('#' + packageAndType)
             );
         }

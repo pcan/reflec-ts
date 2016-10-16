@@ -112,7 +112,7 @@ function generateProtocolFile(protocolTs: string, typeScriptServicesDts: string)
         const originalGetSourceFile = host.getSourceFile;
         host.getSourceFile = (fileName) => {
             if (fileName === protocolFileName) {
-                return ts.createSourceFile(fileName, protocolDts, options.target);
+                return ts.createSourceFile(fileName, protocolDts, options);
             }
             return originalGetSourceFile.apply(host, [fileName]);
         }

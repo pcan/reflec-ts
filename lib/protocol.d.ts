@@ -1704,13 +1704,13 @@ declare namespace ts.server.protocol {
         indentStyle?: IndentStyle;
     }
 
-    enum IndentStyle {
+    const enum IndentStyle {
         None = 0,
         Block = 1,
         Smart = 2,
     }
 
-    enum ScriptKind {
+    const enum ScriptKind {
         Unknown = 0,
         JS = 1,
         JSX = 2,
@@ -1790,28 +1790,27 @@ declare namespace ts.server.protocol {
         [option: string]: CompilerOptionsValue | undefined;
     }
 
-    enum JsxEmit {
+    const enum JsxEmit {
         None = 0,
         Preserve = 1,
         React = 2,
     }
 
-    enum ModuleKind {
+    const enum ModuleKind {
         None = 0,
         CommonJS = 1,
         AMD = 2,
         UMD = 3,
         System = 4,
-        ES6 = 5,
         ES2015 = 5,
     }
 
-    enum ModuleResolutionKind {
+    const enum ModuleResolutionKind {
         Classic = 1,
         NodeJs = 2,
     }
 
-    enum NewLineKind {
+    const enum NewLineKind {
         CarriageReturnLineFeed = 0,
         LineFeed = 1,
     }
@@ -1820,12 +1819,13 @@ declare namespace ts.server.protocol {
         [index: string]: T;
     }
 
-    enum ScriptTarget {
+    const enum ScriptTarget {
         ES3 = 0,
         ES5 = 1,
-        ES6 = 2,
         ES2015 = 2,
-        Latest = 2,
+        ES2016 = 3,
+        ES2017 = 4,
+        Latest = 4,
     }
 
     type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]>;
