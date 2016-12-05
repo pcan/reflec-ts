@@ -53,6 +53,7 @@ namespace ts {
         /* @internal */ getNamedDeclarations(): Map<Declaration[]>;
 
         getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
+        getLineEndOfPosition(pos: number): number;
         getLineStarts(): number[];
         getPositionOfLineAndCharacter(line: number, character: number): number;
         update(newText: string, textChangeRange: TextChangeRange): SourceFile;
@@ -97,7 +98,7 @@ namespace ts {
                 return this.text.length;
             }
 
-            public getChangeRange(oldSnapshot: IScriptSnapshot): TextChangeRange {
+            public getChangeRange(): TextChangeRange {
                 // Text-based snapshots do not support incremental parsing. Return undefined
                 // to signal that to the caller.
                 return undefined;

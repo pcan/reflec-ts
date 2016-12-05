@@ -19,39 +19,51 @@ namespace ts.reflection {
             case TypeFlags.TypeParameter:
                 writeTypeParameter();
                 break;
-            case TypeFlags.Class:
-            case TypeFlags.Reference | TypeFlags.Class:
-                writeClassType();
-                break;
-            case TypeFlags.Interface:
-            case TypeFlags.Reference | TypeFlags.Interface:
-                writeInterfaceType();
-                break;
-            case TypeFlags.Reference:
-                writeTypeReference();
-                break;
             case TypeFlags.Union:  // let x: T | U;
                 writeUnionType();
                 break;
             case TypeFlags.Intersection: // let x: T & U;
                 writeIntersectionType();
                 break;
-            case TypeFlags.Tuple: // let x: [string, number];
-            case TypeFlags.Reference | TypeFlags.Tuple:
-                debug.warn('Detected tuple type. Not supported yet.');
-                break;
-            case TypeFlags.Anonymous:
-                writeAnonymousType();
-                break;
             case TypeFlags.Never:
                 debug.warn('Detected never type. Not supported yet.');
                 break;
+
+            case TypeFlags.Object:
+                writeObjectType();
+                break;
+
             default:
                 let name = type.symbol ? type.symbol.name : 'unknown';
                 debug.warn('exploreType found an unknown type:', name, 'with typeFlags:', type.flags);
         }
 
         return discoveredTypes;
+
+
+        function writeObjectType() {
+            let objectType = <ObjectType>type;
+            switch (objectType.objectFlags) {
+                case ObjectFlags.Class:
+                case ObjectFlags.Reference | ObjectFlags.Class:
+                    writeClassType();
+                    break;
+                case ObjectFlags.Interface:
+                case ObjectFlags.Reference | ObjectFlags.Interface:
+                    writeInterfaceType();
+                    break;
+                case ObjectFlags.Reference:
+                    writeTypeReference();
+                    break;
+                case ObjectFlags.Tuple: // let x: [string, number];
+                case ObjectFlags.Reference | ObjectFlags.Tuple:
+                    debug.warn('Detected tuple type. Not supported yet.');
+                    break;
+                case ObjectFlags.Anonymous:
+                    writeAnonymousType();
+                    break;
+            }
+        }
 
 
         /**
@@ -360,7 +372,7 @@ namespace ts.reflection {
             for (let declaration of type.symbol.declarations) {
                 result = getClassExtendsHeritageClauseElement(<ClassLikeDeclaration>declaration);
                 if (result) {
-                    return checker.getTypeAtLocation(result).flags & TypeFlags.Class ? result : null;
+                    return (<ObjectType>checker.getTypeAtLocation(result)).objectFlags & ObjectFlags.Class ? result : null;
                 }
             }
             return null;

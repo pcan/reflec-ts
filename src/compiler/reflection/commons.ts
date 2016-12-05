@@ -44,8 +44,6 @@ namespace ts.reflection {
     export const localTypeVar = '_l';
     export const tempTypeVar = '_t';
 
-    const reflectionModuleNameInit = 'var ' + reflectionModuleName + ' = globalObj.' + reflectionModuleName + ' || {' + libsField + ':  O_o() };';
-
     export interface TypePackage {
         name: string;
         fullName: string;
@@ -103,9 +101,10 @@ namespace ts.reflection {
         TypeFlags.Void | TypeFlags.Undefined | TypeFlags.Null | TypeFlags.Never;
 
     export const allTypeFlagsMask = intrinsicTypeFlagsMask | TypeFlags.TypeParameter
-        | TypeFlags.Class | TypeFlags.Interface
-        | TypeFlags.Reference | TypeFlags.Tuple | TypeFlags.Union
-        | TypeFlags.Intersection | TypeFlags.Anonymous;
+        | TypeFlags.Union | TypeFlags.Intersection | TypeFlags.Object;
+        // | TypeFlags.Class | TypeFlags.Interface
+        // | TypeFlags.Reference | TypeFlags.Tuple
+        //  | TypeFlags.Anonymous;
 
 
     export function getIntrinsicType(typeFlags: TypeFlags) {

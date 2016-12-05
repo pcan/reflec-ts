@@ -47,7 +47,7 @@ namespace ts {
     // be a good thing.  If it decreases, that's not great (less reusability), but that may be
     // unavoidable.  If it does decrease an investigation should be done to make sure that things
     // are still ok and we're still appropriately reusing most of the tree.
-    function compareTrees(oldText: IScriptSnapshot, newText: IScriptSnapshot, textChangeRange: TextChangeRange, expectedReusedElements: number, oldTree?: SourceFile): SourceFile {
+    function compareTrees(oldText: IScriptSnapshot, newText: IScriptSnapshot, textChangeRange: TextChangeRange, expectedReusedElements: number, oldTree?: SourceFile) {
         oldTree = oldTree || createTree(oldText, /*version:*/ ".");
         Utils.assertInvariants(oldTree, /*parent:*/ undefined);
 
@@ -76,7 +76,7 @@ namespace ts {
             assert.equal(actualReusedCount, expectedReusedElements, actualReusedCount + " !== " + expectedReusedElements);
         }
 
-        return incrementalNewTree;
+        return { oldTree, newTree, incrementalNewTree };
     }
 
     function reusedElements(oldNode: SourceFile, newNode: SourceFile): number {
@@ -103,7 +103,7 @@ namespace ts {
         for (let i = 0; i < repeat; i++) {
             const oldText = ScriptSnapshot.fromString(source);
             const newTextAndChange = withDelete(oldText, index, 1);
-            const newTree = compareTrees(oldText, newTextAndChange.text, newTextAndChange.textChangeRange, -1, oldTree);
+            const newTree = compareTrees(oldText, newTextAndChange.text, newTextAndChange.textChangeRange, -1, oldTree).incrementalNewTree;
 
             source = newTextAndChange.text.getText(0, newTextAndChange.text.getLength());
             oldTree = newTree;
@@ -116,7 +116,7 @@ namespace ts {
         for (let i = 0; i < repeat; i++) {
             const oldText = ScriptSnapshot.fromString(source);
             const newTextAndChange = withInsert(oldText, index + i, toInsert.charAt(i));
-            const newTree = compareTrees(oldText, newTextAndChange.text, newTextAndChange.textChangeRange, -1, oldTree);
+            const newTree = compareTrees(oldText, newTextAndChange.text, newTextAndChange.textChangeRange, -1, oldTree).incrementalNewTree;
 
             source = newTextAndChange.text.getText(0, newTextAndChange.text.getLength());
             oldTree = newTree;
@@ -794,6 +794,16 @@ module m3 { }\
             const newTextAndChange = withChange(oldText, 14, "var v =".length, "class C");
 
             compareTrees(oldText, newTextAndChange.text, newTextAndChange.textChangeRange, 4);
+        });
+
+        it("Reuse transformFlags of subtree during bind", () => {
+            const source = `class Greeter { constructor(element: HTMLElement) { } }`;
+            const oldText = ScriptSnapshot.fromString(source);
+            const newTextAndChange = withChange(oldText, 15, 0, "\n");
+            const { oldTree, incrementalNewTree } = compareTrees(oldText, newTextAndChange.text, newTextAndChange.textChangeRange, -1);
+            bindSourceFile(oldTree, {});
+            bindSourceFile(incrementalNewTree, {});
+            assert.equal(oldTree.transformFlags, incrementalNewTree.transformFlags);
         });
 
         // Simulated typing tests.
