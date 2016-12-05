@@ -23,7 +23,7 @@ namespace ts {
         compilerOptions: CompilerOptions;
     }
 
-    export type StatementsBlock = DefaultClause;
+    export type StatementsBlock = Block | SourceFile | ModuleBlock;
     export type TypeDeclaration = DeclarationStatement;
 
 }
@@ -43,8 +43,6 @@ namespace ts.reflection {
     export const libsField = '$libs'; // Reflection.$libs will contain all data for each loaded module.
     export const localTypeVar = '_l';
     export const tempTypeVar = '_t';
-
-    const reflectionModuleNameInit = 'var ' + reflectionModuleName + ' = globalObj.' + reflectionModuleName + ' || {' + libsField + ':  O_o() };';
 
     export interface TypePackage {
         name: string;
@@ -103,9 +101,10 @@ namespace ts.reflection {
         TypeFlags.Void | TypeFlags.Undefined | TypeFlags.Null | TypeFlags.Never;
 
     export const allTypeFlagsMask = intrinsicTypeFlagsMask | TypeFlags.TypeParameter
-        | TypeFlags.Class | TypeFlags.Interface
-        | TypeFlags.Reference | TypeFlags.Tuple | TypeFlags.Union
-        | TypeFlags.Intersection | TypeFlags.Anonymous;
+        | TypeFlags.Union | TypeFlags.Intersection | TypeFlags.Object;
+        // | TypeFlags.Class | TypeFlags.Interface
+        // | TypeFlags.Reference | TypeFlags.Tuple
+        //  | TypeFlags.Anonymous;
 
 
     export function getIntrinsicType(typeFlags: TypeFlags) {

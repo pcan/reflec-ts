@@ -32,7 +32,7 @@ namespace ts.reflection {
 
     }
 
-    export function emitReflectionModule(resolver: EmitResolver, host: EmitHost, program: Program, sourceFile: SourceFile) {
+    export function emitReflectionModule(host: EmitHost, program: Program) {
         let compilerOptions = host.getCompilerOptions();
         if (!compilerOptions || !compilerOptions.reflectionEnabled) {
             return;

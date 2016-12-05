@@ -15,6 +15,10 @@ namespace ts.reflection {
             return <T>createNode(kind, (pos >= 0) ? pos : 0, (end >= 0) ? end : (pos >= 0) ? pos : 0);
         }
 
+        createToken<TKind extends SyntaxKind>(kind: TKind, pos?: number, end?: number): Token<TKind> {
+            return <Token<TKind>>createNode(kind, (pos >= 0) ? pos : 0, (end >= 0) ? end : (pos >= 0) ? pos : 0);
+        }
+
         createIdentifier(text: string): Identifier {
             const node = this.createNode<Identifier>(SyntaxKind.Identifier, this.pos());
             node.text = text;
@@ -46,7 +50,7 @@ namespace ts.reflection {
             return node;
         }
 
-        createBinaryExpression(left: Expression, operatorToken: Node, right: Expression): BinaryExpression {
+        createBinaryExpression(left: Expression, operatorToken: Token<BinaryOperator>, right: Expression): BinaryExpression {
             const node = this.createNode<BinaryExpression>(SyntaxKind.BinaryExpression);
             node.left = left;
             node.operatorToken = operatorToken;

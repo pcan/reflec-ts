@@ -1,4 +1,4 @@
-import * as Lint from "tslint/lib/lint";
+import * as Lint from "tslint/lib";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -126,7 +126,7 @@ class PreferConstWalker extends Lint.RuleWalker {
     visitModuleDeclaration(node: ts.ModuleDeclaration) {
         if (node.body.kind === ts.SyntaxKind.ModuleBlock) {
             // For some reason module blocks are left out of the visit block traversal
-            this.visitBlock(node.body as ts.ModuleBlock);
+            this.visitBlock(node.body as any as ts.Block);
         }
         super.visitModuleDeclaration(node);
     }
