@@ -1,0 +1,50 @@
+=== c:/root/file1.ts ===
+
+
+interface MyInterface {}
+> : Interface
+> : Interface
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : typeof Reflection
+> : { (fullyQualifiedName: string): Interface; (pkg: string, name: string): Interface; }
+> : string
+> : "file1"
+> : "#MyInterface"
+>MyInterface : 
+
+
+> : void
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof Reflection
+> : (constructor: Function, fullyQualifiedName: string) => void
+> : typeof default
+> : string
+> : "file1"
+> : "#default"
+
+export default class implements MyInterface {
+>MyInterface : 
+
+
+
+	a: string;
+>a : string
+
+    method() {
+>method : () => void
+
+        this.constructor.getClass().name;
+>this.constructor.getClass().name : string
+>this.constructor.getClass() : Class
+>this.constructor.getClass : () => Class
+>this.constructor : Function
+>this : this
+>constructor : Function
+>getClass : () => Class
+>name : string
+    }
+}
+
+
+
+
