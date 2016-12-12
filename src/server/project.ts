@@ -1,4 +1,4 @@
-﻿/// <reference path="..\services\services.ts" />
+/// <reference path="..\services\services.ts" />
 /// <reference path="utilities.ts"/>
 /// <reference path="scriptInfo.ts"/>
 /// <reference path="lsHost.ts"/>
@@ -188,6 +188,10 @@ namespace ts.server {
 
         builder: Builder;
         /**
+         * Set of files names that were updated since the last call to getChangesSinceVersion.
+         */
+        private updatedFileNames: Map<string>;
+        /**
          * Set of files that was returned from the last call to getChangesSinceVersion.
          */
         private lastReportedFileNames: Map<string>;
@@ -248,9 +252,7 @@ namespace ts.server {
                 this.compilerOptions.allowNonTsExtensions = true;
             }
 
-            if (this.projectKind === ProjectKind.Inferred || this.projectKind === ProjectKind.External) {
-                this.compilerOptions.noEmitForJsFiles = true;
-            }
+            this.setInternalCompilerOptionsForEmittingJsFiles();
 
             this.lsHost = new LSHost(this.projectService.host, this, this.projectService.cancellationToken);
             this.lsHost.setCompilationSettings(this.compilerOptions);
@@ -264,6 +266,12 @@ namespace ts.server {
 
             this.builder = createBuilder(this);
             this.markAsDirty();
+        }
+
+        private setInternalCompilerOptionsForEmittingJsFiles() {
+            if (this.projectKind === ProjectKind.Inferred || this.projectKind === ProjectKind.External) {
+                this.compilerOptions.noEmitForJsFiles = true;
+            }
         }
 
         getProjectErrors() {
@@ -444,7 +452,7 @@ namespace ts.server {
 
         containsFile(filename: NormalizedPath, requireOpen?: boolean) {
             const info = this.projectService.getScriptInfoForNormalizedPath(filename);
-            if (info && (info.isOpen || !requireOpen)) {
+            if (info && (info.isScriptOpen() || !requireOpen)) {
                 return this.containsScriptInfo(info);
             }
         }
@@ -474,6 +482,10 @@ namespace ts.server {
             }
 
             this.markAsDirty();
+        }
+
+        registerFileUpdate(fileName: string) {
+            (this.updatedFileNames || (this.updatedFileNames = createMap<string>()))[fileName] = fileName;
         }
 
         markAsDirty() {
@@ -637,6 +649,7 @@ namespace ts.server {
                     this.lastCachedUnresolvedImportsList = undefined;
                 }
                 this.compilerOptions = compilerOptions;
+                this.setInternalCompilerOptionsForEmittingJsFiles();
                 this.lsHost.setCompilationSettings(compilerOptions);
 
                 this.markAsDirty();
@@ -662,10 +675,12 @@ namespace ts.server {
                 isInferred: this.projectKind === ProjectKind.Inferred,
                 options: this.getCompilerOptions()
             };
+            const updatedFileNames = this.updatedFileNames;
+            this.updatedFileNames = undefined;
             // check if requested version is the same that we have reported last time
             if (this.lastReportedFileNames && lastKnownVersion === this.lastReportedVersion) {
-                // if current structure version is the same - return info witout any changes
-                if (this.projectStructureVersion == this.lastReportedVersion) {
+                // if current structure version is the same - return info without any changes
+                if (this.projectStructureVersion == this.lastReportedVersion && !updatedFileNames) {
                     return { info, projectErrors: this.projectErrors };
                 }
                 // compute and return the difference
@@ -674,6 +689,7 @@ namespace ts.server {
 
                 const added: string[] = [];
                 const removed: string[] = [];
+                const updated: string[] = getOwnKeys(updatedFileNames);
                 for (const id in currentFiles) {
                     if (!hasProperty(lastReportedFileNames, id)) {
                         added.push(id);
@@ -686,7 +702,7 @@ namespace ts.server {
                 }
                 this.lastReportedFileNames = currentFiles;
                 this.lastReportedVersion = this.projectStructureVersion;
-                return { info, changes: { added, removed }, projectErrors: this.projectErrors };
+                return { info, changes: { added, removed, updated }, projectErrors: this.projectErrors };
             }
             else {
                 // unknown version - return everything
