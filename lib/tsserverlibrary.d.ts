@@ -379,26 +379,20 @@ declare namespace ts {
         HasImplicitReturn = 128,
         HasExplicitReturn = 256,
         GlobalAugmentation = 512,
-        HasClassExtends = 1024,
-        HasDecorators = 2048,
-        HasParamDecorators = 4096,
-        HasAsyncFunctions = 8192,
-        HasSpreadAttribute = 16384,
-        HasRestAttribute = 32768,
-        DisallowInContext = 65536,
-        YieldContext = 131072,
-        DecoratorContext = 262144,
-        AwaitContext = 524288,
-        ThisNodeHasError = 1048576,
-        JavaScriptFile = 2097152,
-        ThisNodeOrAnySubNodesHasError = 4194304,
-        HasAggregatedChildData = 8388608,
+        HasAsyncFunctions = 1024,
+        DisallowInContext = 2048,
+        YieldContext = 4096,
+        DecoratorContext = 8192,
+        AwaitContext = 16384,
+        ThisNodeHasError = 32768,
+        JavaScriptFile = 65536,
+        ThisNodeOrAnySubNodesHasError = 131072,
+        HasAggregatedChildData = 262144,
         BlockScoped = 3,
         ReachabilityCheckFlags = 384,
-        EmitHelperFlags = 64512,
-        ReachabilityAndEmitFlags = 64896,
-        ContextFlags = 3080192,
-        TypeExcludesFlags = 655360,
+        ReachabilityAndEmitFlags = 1408,
+        ContextFlags = 96256,
+        TypeExcludesFlags = 20480,
     }
     const enum ModifierFlags {
         None = 0,
@@ -1570,6 +1564,7 @@ declare namespace ts {
         writeSpace(text: string): void;
         writeStringLiteral(text: string): void;
         writeParameter(text: string): void;
+        writeProperty(text: string): void;
         writeSymbol(text: string, symbol: Symbol): void;
         writeLine(): void;
         increaseIndent(): void;
@@ -1722,6 +1717,7 @@ declare namespace ts {
         UnionOrIntersection = 196608,
         StructuredType = 229376,
         StructuredOrTypeParameter = 507904,
+        TypeVariable = 540672,
         Narrowable = 1033215,
         NotUnionOrUnit = 33281,
     }
@@ -1791,15 +1787,18 @@ declare namespace ts {
         elementType: Type;
         finalArrayType?: Type;
     }
-    interface TypeParameter extends Type {
+    interface TypeVariable extends Type {
+    }
+    interface TypeParameter extends TypeVariable {
         constraint: Type;
     }
-    interface IndexType extends Type {
-        type: TypeParameter;
-    }
-    interface IndexedAccessType extends Type {
+    interface IndexedAccessType extends TypeVariable {
         objectType: Type;
         indexType: Type;
+        constraint?: Type;
+    }
+    interface IndexType extends Type {
+        type: TypeVariable | UnionOrIntersectionType;
     }
     const enum SignatureKind {
         Call = 0,
@@ -1818,6 +1817,11 @@ declare namespace ts {
         type: Type;
         isReadonly: boolean;
         declaration?: SignatureDeclaration;
+    }
+    interface FileExtensionInfo {
+        extension: string;
+        scriptKind: ScriptKind;
+        isMixedContent: boolean;
     }
     interface DiagnosticMessage {
         key: string;
@@ -2224,7 +2228,7 @@ declare namespace ts {
         config?: any;
         error?: Diagnostic;
     };
-    function parseJsonConfigFileContent(json: any, host: ParseConfigHost, basePath: string, existingOptions?: CompilerOptions, configFileName?: string, resolutionStack?: Path[]): ParsedCommandLine;
+    function parseJsonConfigFileContent(json: any, host: ParseConfigHost, basePath: string, existingOptions?: CompilerOptions, configFileName?: string, resolutionStack?: Path[], extraFileExtensions?: FileExtensionInfo[]): ParsedCommandLine;
     function convertCompileOnSaveOptionFromJson(jsonOption: any, basePath: string, errors: Diagnostic[]): boolean;
     function convertCompilerOptionsFromJson(jsonOptions: any, basePath: string, configFileName?: string): {
         options: CompilerOptions;
@@ -2816,7 +2820,8 @@ declare namespace ts {
 declare namespace ts.server {
     const ActionSet: ActionSet;
     const ActionInvalidate: ActionInvalidate;
-    const EventInstall: EventInstall;
+    const EventBeginInstallTypes: EventBeginInstallTypes;
+    const EventEndInstallTypes: EventEndInstallTypes;
     namespace Arguments {
         const GlobalCacheLocation = "--globalTypingsCacheLocation";
         const LogFile = "--logFile";
@@ -3196,11 +3201,13 @@ declare namespace ts.server.protocol {
     interface ProjectChanges {
         added: string[];
         removed: string[];
+        updated: string[];
     }
     interface ConfigureRequestArguments {
         hostInfo?: string;
         file?: string;
         formatOptions?: FormatCodeSettings;
+        extraFileExtensions?: FileExtensionInfo[];
     }
     interface ConfigureRequest extends Request {
         command: CommandTypes.Configure;
@@ -3553,6 +3560,25 @@ declare namespace ts.server.protocol {
         installSuccess: boolean;
         typingsInstallerVersion: string;
     }
+    type BeginInstallTypesEventName = "beginInstallTypes";
+    type EndInstallTypesEventName = "endInstallTypes";
+    interface BeginInstallTypesEvent extends Event {
+        event: BeginInstallTypesEventName;
+        body: BeginInstallTypesEventBody;
+    }
+    interface EndInstallTypesEvent extends Event {
+        event: EndInstallTypesEventName;
+        body: EndInstallTypesEventBody;
+    }
+    interface InstallTypesEventBody {
+        eventId: number;
+        packages: ReadonlyArray<string>;
+    }
+    interface BeginInstallTypesEventBody extends InstallTypesEventBody {
+    }
+    interface EndInstallTypesEventBody extends InstallTypesEventBody {
+        success: boolean;
+    }
     interface NavBarResponse extends Response {
         body?: NavigationBarItem[];
     }
@@ -3686,20 +3712,25 @@ declare namespace ts.server {
         private readonly host;
         readonly fileName: NormalizedPath;
         readonly scriptKind: ScriptKind;
-        isOpen: boolean;
         hasMixedContent: boolean;
         readonly containingProjects: Project[];
         private formatCodeSettings;
         readonly path: Path;
         private fileWatcher;
-        private svc;
-        constructor(host: ServerHost, fileName: NormalizedPath, content: string, scriptKind: ScriptKind, isOpen?: boolean, hasMixedContent?: boolean);
+        private textStorage;
+        private isOpen;
+        constructor(host: ServerHost, fileName: NormalizedPath, scriptKind: ScriptKind, hasMixedContent?: boolean);
+        isScriptOpen(): boolean;
+        open(newText: string): void;
+        close(): void;
+        getSnapshot(): IScriptSnapshot;
         getFormatCodeSettings(): FormatCodeSettings;
         attachToProject(project: Project): boolean;
         isAttached(project: Project): boolean;
         detachFromProject(project: Project): void;
         detachAllProjects(): void;
         getDefaultProject(): Project;
+        registerFileUpdate(): void;
         setFormatOptions(formatSettings: FormatCodeSettings): void;
         setWatcher(watcher: FileWatcher): void;
         stopWatcher(): void;
@@ -3707,7 +3738,6 @@ declare namespace ts.server {
         reload(script: string): void;
         saveTo(fileName: string): void;
         reloadFromFile(tempFileName?: NormalizedPath): void;
-        snap(): LineIndexSnapshot;
         getLineInfo(line: number): ILineInfo;
         editContent(start: number, end: number, newText: string): void;
         markContainingProjectsAsDirty(): void;
@@ -3833,6 +3863,7 @@ declare namespace ts.server {
         private readonly noSemanticFeaturesLanguageService;
         languageServiceEnabled: boolean;
         builder: Builder;
+        private updatedFileNames;
         private lastReportedFileNames;
         private lastReportedVersion;
         private projectStructureVersion;
@@ -3844,6 +3875,7 @@ declare namespace ts.server {
         isJsOnlyProject(): boolean;
         getCachedUnresolvedImportsPerFile_TestOnly(): UnresolvedImportsMap;
         constructor(projectName: string, projectKind: ProjectKind, projectService: ProjectService, documentRegistry: ts.DocumentRegistry, hasExplicitListOfFiles: boolean, languageServiceEnabled: boolean, compilerOptions: CompilerOptions, compileOnSaveEnabled: boolean);
+        private setInternalCompilerOptionsForEmittingJsFiles();
         getProjectErrors(): Diagnostic[];
         getLanguageService(ensureSynchronized?: boolean): LanguageService;
         getCompileOnSaveAffectedFileList(scriptInfo: ScriptInfo): string[];
@@ -3870,6 +3902,7 @@ declare namespace ts.server {
         isRoot(info: ScriptInfo): boolean;
         addRoot(info: ScriptInfo): void;
         removeFile(info: ScriptInfo, detachFromProject?: boolean): void;
+        registerFileUpdate(fileName: string): void;
         markAsDirty(): void;
         private extractUnresolvedImportsFromSourceFile(file, result);
         updateGraph(): boolean;
@@ -3969,6 +4002,7 @@ declare namespace ts.server {
     interface HostConfiguration {
         formatCodeOptions: FormatCodeSettings;
         hostInfo: string;
+        extraFileExtensions?: FileExtensionInfo[];
     }
     interface OpenConfiguredProjectResult {
         configFileName?: string;
@@ -4055,7 +4089,8 @@ declare namespace ts.server {
         applyChangesInOpenFiles(openFiles: protocol.ExternalFile[], changedFiles: protocol.ChangedOpenFile[], closedFiles: string[]): void;
         private closeConfiguredProject(configFile);
         closeExternalProject(uncheckedFileName: string, suppressRefresh?: boolean): void;
-        openExternalProject(proj: protocol.ExternalProject): void;
+        openExternalProjects(projects: protocol.ExternalProject[]): void;
+        openExternalProject(proj: protocol.ExternalProject, suppressRefreshOfInferredProjects?: boolean): void;
     }
 }
 declare namespace ts.server {
