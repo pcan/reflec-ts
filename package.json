@@ -27,7 +27,7 @@
         "reflec-tsserver": "./bin/tsserver"
     },
     "engines": {
-        "node": ">=0.8.0"
+        "node": ">=4.2.0"
     },
     "devDependencies": {
         "@types/browserify": "latest",
