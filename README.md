@@ -52,7 +52,7 @@ or you can reference `typescriptServices.js` in your IDE.
 
 Now `reflection.d.ts`, which contains all meta-interfaces, is included in `lib.d.ts`; if your IDE supports it, you can point to this file which contains Reflection definitions, too. I tested this with the latest release of Atom (using atom-typescript plugin), and it works well.
 
-**Note:** unfortunately, this version seems not to work with Visual Studio 2015. Currently it includes the 1.8.x branch of the compiler, maybe we have to wait for 2.x compatibility.
+**Note:** this version has not been tested with Visual Studio.
 
 ### How to enable reflection
 
@@ -148,7 +148,7 @@ I'm defining the roadmap right now, the project will evolve to support full refl
 - Support for Object Literals
 - Support for Tuples
 - Support for String Literals
-- Sample projects (currently in progress)s
+- Sample projects (currently in progress)
 
 ## Disclaimer
 
