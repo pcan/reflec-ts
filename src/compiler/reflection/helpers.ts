@@ -123,7 +123,7 @@ namespace ts.reflection {
         }
 
         private pos(): number {
-            return -1;
+            return NaN;
         }
 
     }

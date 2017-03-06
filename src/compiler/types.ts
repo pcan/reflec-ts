@@ -1,11 +1,30 @@
-namespace ts {
-
+﻿namespace ts {
+    /**
+     * Type of objects whose values are all of the same type.
+     * The `in` and `for-in` operators can *not* be safely used,
+     * since `Object.prototype` may be modified by outside code.
+     */
     export interface MapLike<T> {
         [index: string]: T;
     }
 
-    export interface Map<T> extends MapLike<T> {
-        __mapBrand: any;
+    /** ES6 Map interface. */
+    export interface Map<T> {
+        get(key: string): T;
+        has(key: string): boolean;
+        set(key: string, value: T): this;
+        delete(key: string): boolean;
+        clear(): void;
+        forEach(action: (value: T, key: string) => void): void;
+        readonly size: number;
+        keys(): Iterator<string>;
+        values(): Iterator<T>;
+        entries(): Iterator<[string, T]>;
+    }
+
+    /** ES6 Iterator type. */
+    export interface Iterator<T> {
+        next(): { value: T, done: false } | { value: never, done: true };
     }
 
     // branded string type used to store absolute, normalized and canonicalized paths
@@ -175,6 +194,7 @@ namespace ts {
         ReadonlyKeyword,
         RequireKeyword,
         NumberKeyword,
+        ObjectKeyword,
         SetKeyword,
         StringKeyword,
         SymbolKeyword,
@@ -328,6 +348,7 @@ namespace ts {
         EnumMember,
         // Top-level nodes
         SourceFile,
+        Bundle,
 
         // JSDoc nodes
         JSDocTypeExpression,
@@ -401,7 +422,7 @@ namespace ts {
         LastBinaryOperator = CaretEqualsToken,
         FirstNode = QualifiedName,
         FirstJSDocNode = JSDocTypeExpression,
-        LastJSDocNode = JSDocLiteralType,
+        LastJSDocNode = JSDocNeverKeyword,
         FirstJSDocTagNode = JSDocComment,
         LastJSDocTagNode = JSDocNeverKeyword
     }
@@ -816,6 +837,7 @@ namespace ts {
     export interface KeywordTypeNode extends TypeNode {
         kind: SyntaxKind.AnyKeyword
             | SyntaxKind.NumberKeyword
+            | SyntaxKind.ObjectKeyword
             | SyntaxKind.BooleanKeyword
             | SyntaxKind.StringKeyword
             | SyntaxKind.SymbolKeyword
@@ -936,8 +958,7 @@ namespace ts {
     }
 
     // Represents an expression that is elided as part of a transformation to emit comments on a
-    // not-emitted node. The 'expression' property of a NotEmittedExpression should be emitted.
-    // @internal
+    // not-emitted node. The 'expression' property of a PartiallyEmittedExpression should be emitted.
     export interface PartiallyEmittedExpression extends LeftHandSideExpression {
         kind: SyntaxKind.PartiallyEmittedExpression;
         expression: Expression;
@@ -1516,7 +1537,6 @@ namespace ts {
 
     // Represents a statement that is elided as part of a transformation to emit comments on a
     // not-emitted node.
-    // @internal
     export interface NotEmittedStatement extends Statement {
         kind: SyntaxKind.NotEmittedStatement;
     }
@@ -1550,7 +1570,7 @@ namespace ts {
         name?: Identifier;
     }
 
-    export type BlockLike = SourceFile | Block | ModuleBlock | CaseClause;
+    export type BlockLike = SourceFile | Block | ModuleBlock | CaseOrDefaultClause;
 
     export interface Block extends Statement {
         kind: SyntaxKind.Block;
@@ -1751,24 +1771,28 @@ namespace ts {
         members: NodeArray<EnumMember>;
     }
 
-    export type ModuleBody = ModuleBlock | ModuleDeclaration;
-
     export type ModuleName = Identifier | StringLiteral;
+
+    export type ModuleBody = NamespaceBody | JSDocNamespaceBody;
 
     export interface ModuleDeclaration extends DeclarationStatement {
         kind: SyntaxKind.ModuleDeclaration;
         name: Identifier | StringLiteral;
-        body?: ModuleBlock | NamespaceDeclaration | JSDocNamespaceDeclaration | Identifier;
+        body?: ModuleBody | JSDocNamespaceDeclaration | Identifier;
     }
+
+    export type NamespaceBody = ModuleBlock | NamespaceDeclaration;
 
     export interface NamespaceDeclaration extends ModuleDeclaration {
         name: Identifier;
-        body: ModuleBlock | NamespaceDeclaration;
+        body: NamespaceBody;
     }
+
+    export type JSDocNamespaceBody = Identifier | JSDocNamespaceDeclaration;
 
     export interface JSDocNamespaceDeclaration extends ModuleDeclaration {
         name: Identifier;
-        body: JSDocNamespaceDeclaration | Identifier;
+        body: JSDocNamespaceBody;
     }
 
     export interface ModuleBlock extends Node, Statement {
@@ -2047,8 +2071,23 @@ namespace ts {
         ArrayMutation  = 1 << 8,  // Potential array mutation
         Referenced     = 1 << 9,  // Referenced as antecedent once
         Shared         = 1 << 10, // Referenced as antecedent more than once
+        PreFinally     = 1 << 11, // Injected edge that links pre-finally label and pre-try flow
+        AfterFinally   = 1 << 12, // Injected edge that links post-finally flow with the rest of the graph
         Label = BranchLabel | LoopLabel,
         Condition = TrueCondition | FalseCondition
+    }
+
+    export interface FlowLock {
+        locked?: boolean;
+    }
+
+    export interface AfterFinallyFlow extends FlowNode, FlowLock {
+        antecedent: FlowNode;
+    }
+
+    export interface PreFinallyFlow extends FlowNode {
+        antecedent: FlowNode;
+        lock: FlowLock;
     }
 
     export interface FlowNode {
@@ -2178,6 +2217,11 @@ namespace ts {
         /* @internal */ moduleAugmentations: LiteralExpression[];
         /* @internal */ patternAmbientModules?: PatternAmbientModule[];
         /* @internal */ ambientModuleNames: string[];
+    }
+
+    export interface Bundle extends Node {
+        kind: SyntaxKind.Bundle;
+        sourceFiles: SourceFile[];
     }
 
     export interface ScriptReferenceHost {
@@ -2337,8 +2381,15 @@ namespace ts {
         getIndexInfoOfType(type: Type, kind: IndexKind): IndexInfo;
         getSignaturesOfType(type: Type, kind: SignatureKind): Signature[];
         getIndexTypeOfType(type: Type, kind: IndexKind): Type;
-        getBaseTypes(type: InterfaceType): ObjectType[];
+        getBaseTypes(type: InterfaceType): BaseType[];
+        getBaseTypeOfLiteralType(type: Type): Type;
+        getWidenedType(type: Type): Type;
         getReturnTypeOfSignature(signature: Signature): Type;
+        /**
+         * Gets the type of a parameter at a given position in a signature.
+         * Returns `any` if the index is not valid.
+         */
+        /* @internal */ getParameterType(signature: Signature, parameterIndex: number): Type;
         getNonNullableType(type: Type): Type;
 
         getSymbolsInScope(location: Node, meaning: SymbolFlags): Symbol[];
@@ -2368,6 +2419,8 @@ namespace ts {
         isValidPropertyAccess(node: PropertyAccessExpression | QualifiedName, propertyName: string): boolean;
         getAliasedSymbol(symbol: Symbol): Symbol;
         getExportsOfModule(moduleSymbol: Symbol): Symbol[];
+        /** Unlike `getExportsOfModule`, this includes properties of an `export =` value. */
+        /* @internal */ getExportsAndPropertiesOfModule(moduleSymbol: Symbol): Symbol[];
 
         getJsxElementAttributesType(elementNode: JsxOpeningLikeElement): Type;
         getJsxIntrinsicTagNames(): Symbol[];
@@ -2423,6 +2476,7 @@ namespace ts {
         // with import statements it previously saw (but chose not to emit).
         trackSymbol(symbol: Symbol, enclosingDeclaration?: Node, meaning?: SymbolFlags): void;
         reportInaccessibleThisError(): void;
+        reportIllegalExtends(): void;
     }
 
     export const enum TypeFormatFlags {
@@ -2438,7 +2492,8 @@ namespace ts {
         InFirstTypeArgument             = 0x00000100,  // Writing first type argument of the instantiated type
         InTypeAlias                     = 0x00000200,  // Writing type in type alias declaration
         UseTypeAliasValue               = 0x00000400,  // Serialize the type instead of using type-alias. This is needed when we emit declaration file.
-        SuppressAnyReturnType            = 0x00000800,  // If the return type is any-like, don't offer a return type.
+        SuppressAnyReturnType           = 0x00000800,  // If the return type is any-like, don't offer a return type.
+        AddUndefined                    = 0x00001000,  // Add undefined to types of initialized, non-optional parameters
     }
 
     export const enum SymbolFormatFlags {
@@ -2543,6 +2598,7 @@ namespace ts {
         isDeclarationVisible(node: Declaration): boolean;
         collectLinkedAliases(node: Identifier): Node[];
         isImplementationOfOverload(node: FunctionLikeDeclaration): boolean;
+        isRequiredInitializedParameter(node: ParameterDeclaration): boolean;
         writeTypeOfDeclaration(declaration: AccessorDeclaration | VariableLikeDeclaration, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
         writeReturnTypeOfSignatureDeclaration(signatureDeclaration: SignatureDeclaration, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
         writeTypeOfExpression(expr: Expression, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
@@ -2566,37 +2622,34 @@ namespace ts {
 
     export const enum SymbolFlags {
         None                    = 0,
-        FunctionScopedVariable  = 0x00000001,  // Variable (var) or parameter
-        BlockScopedVariable     = 0x00000002,  // A block-scoped variable (let or const)
-        Property                = 0x00000004,  // Property or enum member
-        EnumMember              = 0x00000008,  // Enum member
-        Function                = 0x00000010,  // Function
-        Class                   = 0x00000020,  // Class
-        Interface               = 0x00000040,  // Interface
-        ConstEnum               = 0x00000080,  // Const enum
-        RegularEnum             = 0x00000100,  // Enum
-        ValueModule             = 0x00000200,  // Instantiated module
-        NamespaceModule         = 0x00000400,  // Uninstantiated module
-        TypeLiteral             = 0x00000800,  // Type Literal or mapped type
-        ObjectLiteral           = 0x00001000,  // Object Literal
-        Method                  = 0x00002000,  // Method
-        Constructor             = 0x00004000,  // Constructor
-        GetAccessor             = 0x00008000,  // Get accessor
-        SetAccessor             = 0x00010000,  // Set accessor
-        Signature               = 0x00020000,  // Call, construct, or index signature
-        TypeParameter           = 0x00040000,  // Type parameter
-        TypeAlias               = 0x00080000,  // Type alias
-        ExportValue             = 0x00100000,  // Exported value marker (see comment in declareModuleMember in binder)
-        ExportType              = 0x00200000,  // Exported type marker (see comment in declareModuleMember in binder)
-        ExportNamespace         = 0x00400000,  // Exported namespace marker (see comment in declareModuleMember in binder)
-        Alias                   = 0x00800000,  // An alias for another symbol (see comment in isAliasSymbolDeclaration in checker)
-        Instantiated            = 0x01000000,  // Instantiated symbol
-        Merged                  = 0x02000000,  // Merged symbol (created during program binding)
-        Transient               = 0x04000000,  // Transient symbol (created during type check)
-        Prototype               = 0x08000000,  // Prototype property (no source representation)
-        SyntheticProperty       = 0x10000000,  // Property in union or intersection type
-        Optional                = 0x20000000,  // Optional property
-        ExportStar              = 0x40000000,  // Export * declaration
+        FunctionScopedVariable  = 1 << 0,   // Variable (var) or parameter
+        BlockScopedVariable     = 1 << 1,   // A block-scoped variable (let or const)
+        Property                = 1 << 2,   // Property or enum member
+        EnumMember              = 1 << 3,   // Enum member
+        Function                = 1 << 4,   // Function
+        Class                   = 1 << 5,   // Class
+        Interface               = 1 << 6,   // Interface
+        ConstEnum               = 1 << 7,   // Const enum
+        RegularEnum             = 1 << 8,   // Enum
+        ValueModule             = 1 << 9,   // Instantiated module
+        NamespaceModule         = 1 << 10,  // Uninstantiated module
+        TypeLiteral             = 1 << 11,  // Type Literal or mapped type
+        ObjectLiteral           = 1 << 12,  // Object Literal
+        Method                  = 1 << 13,  // Method
+        Constructor             = 1 << 14,  // Constructor
+        GetAccessor             = 1 << 15,  // Get accessor
+        SetAccessor             = 1 << 16,  // Set accessor
+        Signature               = 1 << 17,  // Call, construct, or index signature
+        TypeParameter           = 1 << 18,  // Type parameter
+        TypeAlias               = 1 << 19,  // Type alias
+        ExportValue             = 1 << 20,  // Exported value marker (see comment in declareModuleMember in binder)
+        ExportType              = 1 << 21,  // Exported type marker (see comment in declareModuleMember in binder)
+        ExportNamespace         = 1 << 22,  // Exported namespace marker (see comment in declareModuleMember in binder)
+        Alias                   = 1 << 23,  // An alias for another symbol (see comment in isAliasSymbolDeclaration in checker)
+        Prototype               = 1 << 24,  // Prototype property (no source representation)
+        ExportStar              = 1 << 25,  // Export * declaration
+        Optional                = 1 << 26,  // Optional property
+        Transient               = 1 << 27,  // Transient symbol (created during type check)
 
         Enum = RegularEnum | ConstEnum,
         Variable = FunctionScopedVariable | BlockScopedVariable,
@@ -2656,11 +2709,9 @@ namespace ts {
         name: string;                           // Name of symbol
         declarations?: Declaration[];           // Declarations associated with this symbol
         valueDeclaration?: Declaration;         // First value declaration of the symbol
-
         members?: SymbolTable;                  // Class, interface or literal instance members
         exports?: SymbolTable;                  // Module exports
         globalExports?: SymbolTable;            // Conditional global UMD exports
-        /* @internal */ isReadonly?: boolean;   // readonly? (set only for intersections and unions)
         /* @internal */ id?: number;            // Unique id (used to look up SymbolLinks)
         /* @internal */ mergeId?: number;       // Merge id (used to look up merged symbol)
         /* @internal */ parent?: Symbol;        // Parent symbol
@@ -2684,8 +2735,7 @@ namespace ts {
         containingType?: UnionOrIntersectionType;  // Containing union or intersection type for synthetic property
         leftSpread?: Symbol;                // Left source for synthetic spread property
         rightSpread?: Symbol;               // Right source for synthetic spread property
-        hasNonUniformType?: boolean;        // True if constituents have non-uniform types
-        isPartial?: boolean;                // True if syntheric property of union type occurs in some but not all constituents
+        mappedTypeOrigin?: Symbol;          // For a property on a mapped type, points back to the orignal 'T' from 'keyof T'.
         isDiscriminantProperty?: boolean;   // True if discriminant synthetic property
         resolvedExports?: SymbolTable;      // Resolved exports of module
         exportsChecked?: boolean;           // True if exports of external module have been checked
@@ -2695,7 +2745,22 @@ namespace ts {
     }
 
     /* @internal */
-    export interface TransientSymbol extends Symbol, SymbolLinks { }
+    export const enum CheckFlags {
+        Instantiated      = 1 << 0,         // Instantiated symbol
+        SyntheticProperty = 1 << 1,         // Property in union or intersection type
+        Readonly          = 1 << 2,         // Readonly transient symbol
+        Partial           = 1 << 3,         // Synthetic property present in some but not all constituents
+        HasNonUniformType = 1 << 4,         // Synthetic property with non-uniform type in constituents
+        ContainsPublic    = 1 << 5,         // Synthetic property with public constituent(s)
+        ContainsProtected = 1 << 6,         // Synthetic property with protected constituent(s)
+        ContainsPrivate   = 1 << 7,         // Synthetic property with private constituent(s)
+        ContainsStatic    = 1 << 8,         // Synthetic property with static constituent(s)
+    }
+
+    /* @internal */
+    export interface TransientSymbol extends Symbol, SymbolLinks {
+        checkFlags: CheckFlags;
+    }
 
     export type SymbolTable = Map<Symbol>;
 
@@ -2785,6 +2850,7 @@ namespace ts {
         ContainsObjectLiteral   = 1 << 22,  // Type is or contains object literal type
         /* @internal */
         ContainsAnyFunctionType = 1 << 23,  // Type is or contains object literal type
+        NonPrimitive            = 1 << 24,  // intrinsic object type
 
         /* @internal */
         Nullable = Undefined | Null,
@@ -2794,7 +2860,7 @@ namespace ts {
         DefinitelyFalsy = StringLiteral | NumberLiteral | BooleanLiteral | Void | Undefined | Null,
         PossiblyFalsy = DefinitelyFalsy | String | Number | Boolean,
         /* @internal */
-        Intrinsic = Any | String | Number | Boolean | BooleanLiteral | ESSymbol | Void | Undefined | Null | Never,
+        Intrinsic = Any | String | Number | Boolean | BooleanLiteral | ESSymbol | Void | Undefined | Null | Never | NonPrimitive,
         /* @internal */
         Primitive = String | Number | Boolean | Enum | ESSymbol | Void | Undefined | Null | Literal,
         StringLike = String | StringLiteral | Index,
@@ -2803,13 +2869,13 @@ namespace ts {
         EnumLike = Enum | EnumLiteral,
         UnionOrIntersection = Union | Intersection,
         StructuredType = Object | Union | Intersection,
-        StructuredOrTypeParameter = StructuredType | TypeParameter | Index,
+        StructuredOrTypeVariable = StructuredType | TypeParameter | Index | IndexedAccess,
         TypeVariable = TypeParameter | IndexedAccess,
 
         // 'Narrowable' types are types where narrowing actually narrows.
         // This *should* be every type other than null, undefined, void, and never
-        Narrowable = Any | StructuredType | TypeParameter | Index | IndexedAccess | StringLike | NumberLike | BooleanLike | ESSymbol,
-        NotUnionOrUnit = Any | ESSymbol | Object,
+        Narrowable = Any | StructuredType | TypeParameter | Index | IndexedAccess | StringLike | NumberLike | BooleanLike | ESSymbol | NonPrimitive,
+        NotUnionOrUnit = Any | ESSymbol | Object | NonPrimitive,
         /* @internal */
         RequiresWidening = ContainsWideningType | ContainsObjectLiteral,
         /* @internal */
@@ -2844,7 +2910,7 @@ namespace ts {
 
     // Enum types (TypeFlags.Enum)
     export interface EnumType extends Type {
-        memberTypes: Map<EnumLiteralType>;
+        memberTypes: EnumLiteralType[];
     }
 
     // Enum types (TypeFlags.EnumLiteral)
@@ -2863,6 +2929,7 @@ namespace ts {
         ObjectLiteral    = 1 << 7,  // Originates in an object literal
         EvolvingArray    = 1 << 8,  // Evolving array type
         ObjectLiteralPatternWithComputedProperties = 1 << 9,  // Object literal pattern with computed properties
+        NonPrimitive        = 1 << 10,  // NonPrimitive object type
         ClassOrInterface = Class | Interface
     }
 
@@ -2880,8 +2947,11 @@ namespace ts {
         /* @internal */
         resolvedBaseConstructorType?: Type;        // Resolved base constructor type of class
         /* @internal */
-        resolvedBaseTypes: ObjectType[];           // Resolved base types
+        resolvedBaseTypes: BaseType[];             // Resolved base types
     }
+
+    // Object type or intersection of object types
+    export type BaseType = ObjectType | IntersectionType;
 
     export interface InterfaceTypeWithDeclaredMembers extends InterfaceType {
         declaredProperties: Symbol[];              // Declared members
@@ -2915,16 +2985,23 @@ namespace ts {
     export interface UnionOrIntersectionType extends Type {
         types: Type[];                    // Constituent types
         /* @internal */
-        resolvedProperties: SymbolTable;  // Cache of resolved properties
+        propertyCache: SymbolTable;       // Cache of resolved properties
+        /* @internal */
+        resolvedProperties: Symbol[];
         /* @internal */
         resolvedIndexType: IndexType;
+        /* @internal */
+        resolvedBaseConstraint: Type;
         /* @internal */
         couldContainTypeVariables: boolean;
     }
 
     export interface UnionType extends UnionOrIntersectionType { }
 
-    export interface IntersectionType extends UnionOrIntersectionType { }
+    export interface IntersectionType extends UnionOrIntersectionType {
+        /* @internal */
+        resolvedApparentType: Type;
+    }
 
     export type StructuredType = ObjectType | UnionType | IntersectionType;
 
@@ -2978,7 +3055,7 @@ namespace ts {
 
     export interface TypeVariable extends Type {
         /* @internal */
-        resolvedApparentType: Type;
+        resolvedBaseConstraint: Type;
         /* @internal */
         resolvedIndexType: IndexType;
     }
@@ -3096,9 +3173,8 @@ namespace ts {
         ThisProperty
     }
 
-    export interface FileExtensionInfo {
+    export interface JsFileExtensionInfo {
         extension: string;
-        scriptKind: ScriptKind;
         isMixedContent: boolean;
     }
 
@@ -3142,7 +3218,11 @@ namespace ts {
         NodeJs   = 2
     }
 
-    export type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]>;
+    export interface PluginImport {
+        name: string
+    }
+
+    export type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]> | PluginImport[];
 
     export interface CompilerOptions {
         allowJs?: boolean;
@@ -3197,6 +3277,7 @@ namespace ts {
         outDir?: string;
         outFile?: string;
         paths?: MapLike<string[]>;
+        /*@internal*/ plugins?: PluginImport[];
         preserveConstEnums?: boolean;
         project?: string;
         /* @internal */ pretty?: DiagnosticStyle;
@@ -3258,7 +3339,8 @@ namespace ts {
     export const enum JsxEmit {
         None = 0,
         Preserve = 1,
-        React = 2
+        React = 2,
+        ReactNative = 3
     }
 
     export const enum NewLineKind {
@@ -3279,7 +3361,8 @@ namespace ts {
         JS = 1,
         JSX = 2,
         TS = 3,
-        TSX = 4
+        TSX = 4,
+        External = 5
     }
 
     export const enum ScriptTarget {
@@ -3354,7 +3437,7 @@ namespace ts {
     /* @internal */
     export interface CommandLineOptionOfListType extends CommandLineOptionBase {
         type: "list";
-        element: CommandLineOptionOfCustomType | CommandLineOptionOfPrimitiveType;
+        element: CommandLineOptionOfCustomType | CommandLineOptionOfPrimitiveType | TsConfigOnlyOption;
     }
 
     /* @internal */
@@ -3676,13 +3759,12 @@ namespace ts {
         flags?: EmitFlags;                      // Flags that customize emit
         commentRange?: TextRange;               // The text range to use when emitting leading or trailing comments
         sourceMapRange?: TextRange;             // The text range to use when emitting leading or trailing source mappings
-        tokenSourceMapRanges?: Map<TextRange>;  // The text range to use when emitting source mappings for tokens
+        tokenSourceMapRanges?: TextRange[];  // The text range to use when emitting source mappings for tokens
         constantValue?: number;                 // The constant value of an expression
         externalHelpersModuleName?: Identifier; // The local name for an imported helpers module
         helpers?: EmitHelper[];                 // Emit helpers for the node
     }
 
-    /* @internal */
     export const enum EmitFlags {
         SingleLine = 1 << 0,                     // The contents of this node should be emitted on a single line.
         AdviseOnEmitNode = 1 << 1,               // The printer should invoke the onEmitNode callback when printing this node.
@@ -3711,7 +3793,6 @@ namespace ts {
         HasEndOfDeclarationMarker = 1 << 21,     // Declaration has an associated NotEmittedStatement to mark the end of the declaration
     }
 
-    /* @internal */
     export interface EmitHelper {
         readonly name: string;      // A unique name for this helper.
         readonly scoped: boolean;   // Indicates whether ther helper MUST be emitted in the current scope.
@@ -3738,8 +3819,7 @@ namespace ts {
         LastEmitHelper = Generator
     }
 
-    /* @internal */
-    export const enum EmitContext {
+    export const enum EmitHint {
         SourceFile,         // Emitting a SourceFile
         Expression,         // Emitting an Expression
         IdentifierName,     // Emitting an IdentifierName
@@ -3814,7 +3894,7 @@ namespace ts {
          * Hook used by transformers to substitute expressions just before they
          * are emitted by the pretty printer.
          */
-        onSubstituteNode?: (emitContext: EmitContext, node: Node) => Node;
+        onSubstituteNode?: (hint: EmitHint, node: Node) => Node;
 
         /**
          * Enables before/after emit notifications in the pretty printer for the provided
@@ -3832,7 +3912,7 @@ namespace ts {
          * Hook used to allow transformers to capture state before or after
          * the printer emits a node.
          */
-        onEmitNode?: (emitContext: EmitContext, node: Node, emitCallback: (emitContext: EmitContext, node: Node) => void) => void;
+        onEmitNode?: (hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void) => void;
     }
 
     /* @internal */
@@ -3845,24 +3925,131 @@ namespace ts {
         /**
          * Emits the substitute for a node, if one is available; otherwise, emits the node.
          *
-         * @param emitContext The current emit context.
+         * @param hint A hint as to the intended usage of the node.
          * @param node The node to substitute.
          * @param emitCallback A callback used to emit the node or its substitute.
          */
-        emitNodeWithSubstitution(emitContext: EmitContext, node: Node, emitCallback: (emitContext: EmitContext, node: Node) => void): void;
+        emitNodeWithSubstitution(hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void): void;
 
         /**
          * Emits a node with possible notification.
          *
-         * @param emitContext The current emit context.
+         * @param hint A hint as to the intended usage of the node.
          * @param node The node to emit.
          * @param emitCallback A callback used to emit the node.
          */
-        emitNodeWithNotification(emitContext: EmitContext, node: Node, emitCallback: (emitContext: EmitContext, node: Node) => void): void;
+        emitNodeWithNotification(hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void): void;
     }
 
     /* @internal */
     export type Transformer = (context: TransformationContext) => (node: SourceFile) => SourceFile;
+
+    export interface Printer {
+        /**
+         * Print a node and its subtree as-is, without any emit transformations.
+         * @param hint A value indicating the purpose of a node. This is primarily used to
+         * distinguish between an `Identifier` used in an expression position, versus an
+         * `Identifier` used as an `IdentifierName` as part of a declaration. For most nodes you
+         * should just pass `Unspecified`.
+         * @param node The node to print. The node and its subtree are printed as-is, without any
+         * emit transformations.
+         * @param sourceFile A source file that provides context for the node. The source text of
+         * the file is used to emit the original source content for literals and identifiers, while
+         * the identifiers of the source file are used when generating unique names to avoid
+         * collisions.
+         */
+        printNode(hint: EmitHint, node: Node, sourceFile: SourceFile): string;
+        /**
+         * Prints a source file as-is, without any emit transformations.
+         */
+        printFile(sourceFile: SourceFile): string;
+        /**
+         * Prints a bundle of source files as-is, without any emit transformations.
+         */
+        printBundle(bundle: Bundle): string;
+        /*@internal*/ writeNode(hint: EmitHint, node: Node, sourceFile: SourceFile, writer: EmitTextWriter): void;
+        /*@internal*/ writeFile(sourceFile: SourceFile, writer: EmitTextWriter): void;
+        /*@internal*/ writeBundle(bundle: Bundle, writer: EmitTextWriter): void;
+    }
+
+    export interface PrintHandlers {
+        /**
+         * A hook used by the Printer when generating unique names to avoid collisions with
+         * globally defined names that exist outside of the current source file.
+         */
+        hasGlobalName?(name: string): boolean;
+        /**
+         * A hook used by the Printer to provide notifications prior to emitting a node. A
+         * compatible implementation **must** invoke `emitCallback` with the provided `hint` and
+         * `node` values.
+         * @param hint A hint indicating the intended purpose of the node.
+         * @param node The node to emit.
+         * @param emitCallback A callback that, when invoked, will emit the node.
+         * @example
+         * ```ts
+         * var printer = createPrinter(printerOptions, {
+         *   onEmitNode(hint, node, emitCallback) {
+         *     // set up or track state prior to emitting the node...
+         *     emitCallback(hint, node);
+         *     // restore state after emitting the node...
+         *   }
+         * });
+         * ```
+         */
+        onEmitNode?(hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void): void;
+        /**
+         * A hook used by the Printer to perform just-in-time substitution of a node. This is
+         * primarily used by node transformations that need to substitute one node for another,
+         * such as replacing `myExportedVar` with `exports.myExportedVar`. A compatible
+         * implementation **must** invoke `emitCallback` eith the provided `hint` and either
+         * the provided `node`, or its substitute.
+         * @param hint A hint indicating the intended purpose of the node.
+         * @param node The node to emit.
+         * @param emitCallback A callback that, when invoked, will emit the node.
+         * @example
+         * ```ts
+         * var printer = createPrinter(printerOptions, {
+         *   onSubstituteNode(hint, node, emitCallback) {
+         *     // perform substitution if necessary...
+         *     emitCallback(hint, node);
+         *   }
+         * });
+         * ```
+         */
+        onSubstituteNode?(hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void): void;
+        /*@internal*/ onEmitSourceMapOfNode?: (hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void) => void;
+        /*@internal*/ onEmitSourceMapOfToken?: (node: Node, token: SyntaxKind, pos: number, emitCallback: (token: SyntaxKind, pos: number) => number) => number;
+        /*@internal*/ onEmitSourceMapOfPosition?: (pos: number) => void;
+        /*@internal*/ onEmitHelpers?: (node: Node, writeLines: (text: string) => void) => void;
+        /*@internal*/ onSetSourceFile?: (node: SourceFile) => void;
+    }
+
+    export interface PrinterOptions {
+        target?: ScriptTarget;
+        removeComments?: boolean;
+        newLine?: NewLineKind;
+        /*@internal*/ sourceMap?: boolean;
+        /*@internal*/ inlineSourceMap?: boolean;
+        /*@internal*/ extendedDiagnostics?: boolean;
+    }
+
+    /*@internal*/
+    export interface EmitTextWriter {
+        write(s: string): void;
+        writeTextOfNode(text: string, node: Node): void;
+        writeLine(): void;
+        increaseIndent(): void;
+        decreaseIndent(): void;
+        getText(): string;
+        rawWrite(s: string): void;
+        writeLiteral(s: string): void;
+        getTextPos(): number;
+        getLine(): number;
+        getColumn(): number;
+        getIndent(): number;
+        isAtStartOfLine(): boolean;
+        reset(): void;
+    }
 
     export interface TextSpan {
         start: number;

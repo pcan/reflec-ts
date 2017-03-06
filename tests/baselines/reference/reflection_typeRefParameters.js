@@ -162,6 +162,7 @@ class MyClass {
 
 //// [file1.js]
 "use strict";
+exports.__esModule = true;
 require("./Reflection");
 var TypedInterface2 = Reflection.interfaceForName("file1" + "#TypedInterface2");
 var TypedInterface = Reflection.interfaceForName("file1" + "#TypedInterface");

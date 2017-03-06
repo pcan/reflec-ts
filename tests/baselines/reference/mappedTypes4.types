@@ -29,7 +29,7 @@ function boxify<T>(obj: T): Boxified<T> {
 
     if (typeof obj === "object") {
 >typeof obj === "object" : boolean
->typeof obj : string
+>typeof obj : "string" | "number" | "boolean" | "symbol" | "undefined" | "object" | "function"
 >obj : T
 >"object" : "object"
 
@@ -210,4 +210,35 @@ var x1: DeepReadonly<Foo>;
 var x1: DeepReadonlyFoo;
 >x1 : DeepReadonly<Foo>
 >DeepReadonlyFoo : DeepReadonlyFoo
+
+// Repro from #13232
+
+type Z = { a: number };
+>Z : Z
+>a : number
+
+type Clone<T> = {
+>Clone : Clone<T>
+>T : T
+
+  [P in keyof (T & {})]: T[P];
+>P : P
+>T : T
+>T : T
+>P : P
+
+};
+type M = Clone<Z>; // M should be { a: number }
+>M : Clone<Z>
+>Clone : Clone<T>
+>Z : Z
+
+var z1: Z;
+>z1 : Z
+>Z : Z
+
+var z1: Clone<Z>;
+>z1 : Z
+>Clone : Clone<T>
+>Z : Z
 

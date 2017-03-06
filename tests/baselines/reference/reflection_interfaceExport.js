@@ -143,6 +143,7 @@ export class MyClass implements PrivateInt, PublicInt{
 
 //// [file1.js]
 "use strict";
+exports.__esModule = true;
 require("./Reflection");
 exports.PublicInt = Reflection.interfaceForName("file1" + "#PublicInt");
 var PrivateInt = Reflection.interfaceForName("file1" + "#PrivateInt");
