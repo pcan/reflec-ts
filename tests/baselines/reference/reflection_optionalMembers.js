@@ -160,5 +160,6 @@ interface MyInterface {
 
 //// [file1.js]
 "use strict";
+exports.__esModule = true;
 require("./Reflection");
 var MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");

@@ -2,9 +2,11 @@
 
 // @noUnusedLocals: true
 //// [| namespace greeter {
+////   // some legit comments
 ////   function function1() {
 ////   }/*1*/
 //// } |]
 
-verify.codeFixAtPosition(`namespace greeter {
+verify.rangeAfterCodeFix(`namespace greeter {
+    // some legit comments
 }`);

@@ -1,3 +1,12 @@
+declare interface Console {
+    log (msg: any, ...params: any[]): void;
+    info (msg: any, ...params: any[]): void;
+    warn (msg: any, ...params: any[]): void;
+    error (msg: any, ...params: any[]): void;
+}
+
+declare var console: Console;
+
 /* @internal */
 namespace ts {
 
@@ -262,11 +271,12 @@ namespace ts.reflection {
 
     }
 
-    export function valuesOf<T>(dataObject: { [index: string]: T }) {
-        var dataArray: any[] = [];
-        for (var key in dataObject)
-            dataArray.push(dataObject[key]);
-        return <T[]>dataArray;
+    export function valuesOf<T>(dataObject: Map<T>) {
+        let dataArray: T[] = <T[]>[];
+        if (dataObject) {
+            dataObject.forEach(value => dataArray.push(value));
+        }
+        return dataArray;
     }
 
     export module debug {

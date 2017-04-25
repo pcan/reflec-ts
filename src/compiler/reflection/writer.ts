@@ -10,7 +10,7 @@ namespace ts.reflection {
     export function writeType(type: Type, checker: TypeChecker, typeCounter: Counter, writer: Writer): Type[] {
         writer.write(`${tempTypeVar} = ${localTypeVar}[${type.$info.localIndex}];`).writeLine();
         const discoveredTypes: Type[] = [];
-        const members = type.symbol ? valuesOf(type.symbol.members) : [];
+        const members = type.symbol ? valuesOf<Symbol>(type.symbol.members) : [];
 
         switch (type.flags & allTypeFlagsMask) {
             case TypeFlags.StringLiteral:

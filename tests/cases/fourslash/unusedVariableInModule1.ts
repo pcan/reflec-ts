@@ -3,7 +3,7 @@
 // @noUnusedLocals: true
 // @noUnusedParameters: true
 //// export {}
-//// [|var x: string;|]
-//// export var y: string;
+//// [|var x: string;
+//// export var y: string;|]
 
-verify.codeFixAtPosition("");
+verify.rangeAfterCodeFix("export var y: string;");

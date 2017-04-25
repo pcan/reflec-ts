@@ -680,9 +680,13 @@ declare namespace ts.server.protocol {
          */
         options: ExternalProjectCompilerOptions;
         /**
-         * Explicitly specified typing options for the project
+         * @deprecated typingOptions. Use typeAcquisition instead
          */
-        typingOptions?: TypingOptions;
+        typingOptions?: TypeAcquisition;
+        /**
+         * Explicitly specified type acquisition for the project
+         */
+        typeAcquisition?: TypeAcquisition;
     }
     interface CompileOnSaveMixin {
         /**
@@ -707,6 +711,10 @@ declare namespace ts.server.protocol {
          * List of removed files
          */
         removed: string[];
+        /**
+         * List of updated files
+         */
+        updated: string[];
     }
     /**
       * Information found in a configure request.
@@ -725,6 +733,10 @@ declare namespace ts.server.protocol {
          * The format options to use during formatting and other code editing features.
          */
         formatOptions?: FormatCodeSettings;
+        /**
+         * The host's additional supported .js file extensions
+         */
+        extraFileExtensions?: JsFileExtensionInfo[];
     }
     /**
       *  Configure request; value of command field is "configure".  Specifies
@@ -893,6 +905,10 @@ declare namespace ts.server.protocol {
          * List of files names that should be recompiled
          */
         fileNames: string[];
+        /**
+         * true if project uses outFile or out compiler option
+         */
+        projectUsesOutFile: boolean;
     }
     /**
      * Response for CompileOnSaveAffectedFileListRequest request;
@@ -1340,6 +1356,17 @@ declare namespace ts.server.protocol {
         command: CommandTypes.Geterr;
         arguments: GeterrRequestArgs;
     }
+    type RequestCompletedEventName = "requestCompleted";
+    /**
+     * Event that is sent when server have finished processing request with specified id.
+     */
+    interface RequestCompletedEvent extends Event {
+        event: RequestCompletedEventName;
+        body: RequestCompletedEventBody;
+    }
+    interface RequestCompletedEventBody {
+        request_seq: number;
+    }
     /**
       * Item of diagnostic information found in a DiagnosticEvent message.
       */
@@ -1399,6 +1426,25 @@ declare namespace ts.server.protocol {
     interface ConfigFileDiagnosticEvent extends Event {
         body?: ConfigFileDiagnosticEventBody;
         event: "configFileDiag";
+    }
+    type ProjectLanguageServiceStateEventName = "projectLanguageServiceState";
+    interface ProjectLanguageServiceStateEvent extends Event {
+        event: ProjectLanguageServiceStateEventName;
+        body?: ProjectLanguageServiceStateEventBody;
+    }
+    interface ProjectLanguageServiceStateEventBody {
+        /**
+         * Project name that has changes in the state of language service.
+         * For configured projects this will be the config file path.
+         * For external projects this will be the name of the projects specified when project was open.
+         * For inferred projects this event is not raised.
+         */
+        projectName: string;
+        /**
+         * True if language service state switched from disabled to enabled
+         * and false otherwise.
+         */
+        languageServiceEnabled: boolean;
     }
     /**
       * Arguments for reload request.
@@ -1634,6 +1680,38 @@ declare namespace ts.server.protocol {
          * true if install request succeeded, otherwise - false
          */
         installSuccess: boolean;
+        /**
+         * version of typings installer
+         */
+        typingsInstallerVersion: string;
+    }
+    type BeginInstallTypesEventName = "beginInstallTypes";
+    type EndInstallTypesEventName = "endInstallTypes";
+    interface BeginInstallTypesEvent extends Event {
+        event: BeginInstallTypesEventName;
+        body: BeginInstallTypesEventBody;
+    }
+    interface EndInstallTypesEvent extends Event {
+        event: EndInstallTypesEventName;
+        body: EndInstallTypesEventBody;
+    }
+    interface InstallTypesEventBody {
+        /**
+         * correlation id to match begin and end events
+         */
+        eventId: number;
+        /**
+         * list of packages to install
+         */
+        packages: ReadonlyArray<string>;
+    }
+    interface BeginInstallTypesEventBody extends InstallTypesEventBody {
+    }
+    interface EndInstallTypesEventBody extends InstallTypesEventBody {
+        /**
+         * true if installation succeeded, otherwise false
+         */
+        success: boolean;
     }
     interface NavBarResponse extends Response {
         body?: NavigationBarItem[];
@@ -1659,12 +1737,14 @@ declare namespace ts.server.protocol {
         insertSpaceAfterCommaDelimiter?: boolean;
         insertSpaceAfterSemicolonInForStatements?: boolean;
         insertSpaceBeforeAndAfterBinaryOperators?: boolean;
+        insertSpaceAfterConstructor?: boolean;
         insertSpaceAfterKeywordsInControlFlowStatements?: boolean;
         insertSpaceAfterFunctionKeywordForAnonymousFunctions?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces?: boolean;
+        insertSpaceBeforeFunctionParenthesis?: boolean;
         placeOpenBraceOnNewLineForFunctions?: boolean;
         placeOpenBraceOnNewLineForControlBlocks?: boolean;
     }
@@ -1710,6 +1790,7 @@ declare namespace ts.server.protocol {
         outDir?: string;
         outFile?: string;
         paths?: MapLike<string[]>;
+        plugins?: PluginImport[];
         preserveConstEnums?: boolean;
         project?: string;
         reactNamespace?: string;
@@ -1733,9 +1814,10 @@ declare namespace ts.server.protocol {
     namespace JsxEmit {
         type None = "None";
         type Preserve = "Preserve";
+        type ReactNative = "ReactNative";
         type React = "React";
     }
-    type JsxEmit = JsxEmit.None | JsxEmit.Preserve | JsxEmit.React;
+    type JsxEmit = JsxEmit.None | JsxEmit.Preserve | JsxEmit.React | JsxEmit.ReactNative;
     namespace ModuleKind {
         type None = "None";
         type CommonJS = "CommonJS";
@@ -1783,18 +1865,33 @@ declare namespace ts.server.protocol {
         position: number;
     }
 
-    interface TypingOptions {
+    interface TypeAcquisition {
         enableAutoDiscovery?: boolean;
+        enable?: boolean;
         include?: string[];
         exclude?: string[];
         [option: string]: string[] | boolean | undefined;
     }
 
+    interface JsFileExtensionInfo {
+        extension: string;
+        isMixedContent: boolean;
+    }
+
+    /**
+     * Type of objects whose values are all of the same type.
+     * The `in` and `for-in` operators can *not* be safely used,
+     * since `Object.prototype` may be modified by outside code.
+     */
     interface MapLike<T> {
         [index: string]: T;
     }
 
-    type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]>;
+    interface PluginImport {
+        name: string;
+    }
+
+    type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]> | PluginImport[];
 }
 declare namespace ts {
     // these types are empty stubs for types from services and should not be used directly

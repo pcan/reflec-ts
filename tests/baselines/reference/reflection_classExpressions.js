@@ -207,6 +207,7 @@ class MyClass {
 
 //// [file1.js]
 "use strict";
+exports.__esModule = true;
 require("./Reflection");
 var MyClass = (function () {
     function MyClass() {

@@ -417,7 +417,7 @@ namespace ts.server.protocol {
         startOffset: number;
 
         /**
-         * Position (can be specified instead of line/offset pair) 
+         * Position (can be specified instead of line/offset pair)
          */
         /* @internal */
         startPosition?: number;
@@ -433,7 +433,7 @@ namespace ts.server.protocol {
         endOffset: number;
 
         /**
-         * Position (can be specified instead of line/offset pair) 
+         * Position (can be specified instead of line/offset pair)
          */
         /* @internal */
         endPosition?: number;
@@ -445,7 +445,7 @@ namespace ts.server.protocol {
     }
 
     /**
-     * Response for GetCodeFixes request. 
+     * Response for GetCodeFixes request.
      */
     export interface GetCodeFixesResponse extends Response {
         body?: CodeAction[];
@@ -904,6 +904,11 @@ namespace ts.server.protocol {
          * Current set of compiler options for project
          */
         options: ts.CompilerOptions;
+
+        /**
+         * true if project language service is disabled
+         */
+        languageServiceDisabled: boolean;
     }
 
     /**
@@ -996,9 +1001,9 @@ namespace ts.server.protocol {
         formatOptions?: FormatCodeSettings;
 
         /**
-         * The host's additional supported file extensions
+         * The host's additional supported .js file extensions
          */
-        extraFileExtensions?: FileExtensionInfo[];
+        extraFileExtensions?: JsFileExtensionInfo[];
     }
 
     /**
@@ -1234,6 +1239,11 @@ namespace ts.server.protocol {
          * List of files names that should be recompiled
          */
         fileNames: string[];
+
+        /**
+         * true if project uses outFile or out compiler option
+         */
+        projectUsesOutFile: boolean;
     }
 
     /**
@@ -1756,6 +1766,20 @@ namespace ts.server.protocol {
         arguments: GeterrRequestArgs;
     }
 
+    export type RequestCompletedEventName = "requestCompleted";
+
+    /**
+     * Event that is sent when server have finished processing request with specified id.
+     */
+    export interface RequestCompletedEvent extends Event {
+        event: RequestCompletedEventName;
+        body: RequestCompletedEventBody;
+    }
+
+    export interface RequestCompletedEventBody {
+        request_seq: number;
+    }
+
     /**
       * Item of diagnostic information found in a DiagnosticEvent message.
       */
@@ -2189,12 +2213,14 @@ namespace ts.server.protocol {
         insertSpaceAfterCommaDelimiter?: boolean;
         insertSpaceAfterSemicolonInForStatements?: boolean;
         insertSpaceBeforeAndAfterBinaryOperators?: boolean;
+        insertSpaceAfterConstructor?: boolean;
         insertSpaceAfterKeywordsInControlFlowStatements?: boolean;
         insertSpaceAfterFunctionKeywordForAnonymousFunctions?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces?: boolean;
+        insertSpaceBeforeFunctionParenthesis?: boolean;
         placeOpenBraceOnNewLineForFunctions?: boolean;
         placeOpenBraceOnNewLineForControlBlocks?: boolean;
     }
@@ -2241,6 +2267,7 @@ namespace ts.server.protocol {
         outDir?: string;
         outFile?: string;
         paths?: MapLike<string[]>;
+        plugins?: PluginImport[];
         preserveConstEnums?: boolean;
         project?: string;
         reactNamespace?: string;
@@ -2265,10 +2292,11 @@ namespace ts.server.protocol {
     export namespace JsxEmit {
         export type None = "None";
         export type Preserve = "Preserve";
+        export type ReactNative = "ReactNative";
         export type React = "React";
     }
 
-    export type JsxEmit = JsxEmit.None | JsxEmit.Preserve | JsxEmit.React;
+    export type JsxEmit = JsxEmit.None | JsxEmit.Preserve | JsxEmit.React | JsxEmit.ReactNative;
 
     export namespace ModuleKind {
         export type None = "None";

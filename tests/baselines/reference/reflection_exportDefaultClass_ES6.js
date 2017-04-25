@@ -136,6 +136,7 @@ export default class implements MyInterface {
 
 //// [file1.js]
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 require("./Reflection");
 const MyInterface = Reflection.interfaceForName("file1" + "#MyInterface");
 class default_1 {
@@ -143,6 +144,5 @@ class default_1 {
         this.constructor.getClass().name;
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = default_1;
 Reflection.registerClass(default_1, "file1" + "#default");

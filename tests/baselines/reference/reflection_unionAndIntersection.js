@@ -172,6 +172,7 @@ class MyClass {
 
 //// [file1.js]
 "use strict";
+exports.__esModule = true;
 require("./Reflection");
 var I2 = Reflection.interfaceForName("file1" + "#I2");
 var I1 = Reflection.interfaceForName("file1" + "#I1");
