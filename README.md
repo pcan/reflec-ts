@@ -2,6 +2,11 @@
 
 A enhanced (unofficial) version of the [TypeScript compiler](https://github.com/Microsoft/TypeScript) that provides Reflection capabilities.
 
+**This project is currently in stand-by, since I'm waiting the outcome of the following issues (Typescript team should make decisions about these):**
+- [Discussion: (Reflective) Type Model](https://github.com/Microsoft/TypeScript/issues/3628)
+- [Allow "Compiler Plugins"](https://github.com/Microsoft/TypeScript/issues/16607)
+- [Plugin Support for Custom Transformers](https://github.com/Microsoft/TypeScript/issues/14419)
+
 ## Installing
 Releases follow the official ones, so I try to keep the same scheme. For the latest stable version:
 
